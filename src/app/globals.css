@@ -1,0 +1,247 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+  /* Sportzfy custom tokens */
+  --color-brand: var(--brand);
+  --color-brand-dim: var(--brand-dim);
+  --color-live: var(--live);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+}
+
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.55 0.22 274);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.55 0.22 274);
+  --radius: 0.75rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.55 0.22 274);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.55 0.22 274);
+  /* Sportzfy custom */
+  --brand: oklch(0.55 0.22 274);
+  --brand-dim: oklch(0.45 0.18 274);
+  --live: oklch(0.6 0.22 27);
+  --surface: oklch(0.12 0 0);
+  --surface-hover: oklch(0.16 0 0);
+}
+
+.dark {
+  --background: oklch(0.082 0.012 274);
+  --foreground: oklch(0.94 0.01 274);
+  --card: oklch(0.11 0.015 274);
+  --card-foreground: oklch(0.94 0.01 274);
+  --popover: oklch(0.11 0.015 274);
+  --popover-foreground: oklch(0.94 0.01 274);
+  --primary: oklch(0.65 0.22 274);
+  --primary-foreground: oklch(0.082 0.012 274);
+  --secondary: oklch(0.16 0.02 274);
+  --secondary-foreground: oklch(0.94 0.01 274);
+  --muted: oklch(0.16 0.02 274);
+  --muted-foreground: oklch(0.55 0.02 274);
+  --accent: oklch(0.18 0.025 274);
+  --accent-foreground: oklch(0.94 0.01 274);
+  --destructive: oklch(0.65 0.22 27);
+  --border: oklch(1 0 0 / 8%);
+  --input: oklch(1 0 0 / 10%);
+  --ring: oklch(0.65 0.22 274);
+  --chart-1: oklch(0.65 0.22 274);
+  --chart-2: oklch(0.6 0.18 200);
+  --chart-3: oklch(0.7 0.2 150);
+  --chart-4: oklch(0.65 0.22 27);
+  --chart-5: oklch(0.7 0.18 80);
+  --sidebar: oklch(0.1 0.015 274);
+  --sidebar-foreground: oklch(0.94 0.01 274);
+  --sidebar-primary: oklch(0.65 0.22 274);
+  --sidebar-primary-foreground: oklch(0.082 0.012 274);
+  --sidebar-accent: oklch(0.16 0.02 274);
+  --sidebar-accent-foreground: oklch(0.94 0.01 274);
+  --sidebar-border: oklch(1 0 0 / 8%);
+  --sidebar-ring: oklch(0.65 0.22 274);
+  /* Sportzfy custom */
+  --brand: oklch(0.65 0.22 274);
+  --brand-dim: oklch(0.5 0.18 274);
+  --live: oklch(0.65 0.22 27);
+  --surface: oklch(0.13 0.018 274);
+  --surface-hover: oklch(0.17 0.02 274);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+@layer utilities {
+  .glass {
+    background: oklch(0.11 0.015 274 / 70%);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid oklch(1 0 0 / 8%);
+  }
+
+  .glow-brand {
+    box-shadow: 0 0 20px oklch(0.65 0.22 274 / 30%);
+  }
+
+  .glow-live {
+    box-shadow: 0 0 12px oklch(0.65 0.22 27 / 50%);
+  }
+
+  .gradient-brand {
+    background: linear-gradient(135deg, oklch(0.55 0.22 274), oklch(0.6 0.2 220));
+  }
+
+  .text-gradient-brand {
+    background: linear-gradient(135deg, oklch(0.75 0.2 274), oklch(0.75 0.18 220));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+/* Live pulse animation */
+@keyframes pulse-ring {
+  0% { transform: scale(0.85); opacity: 1; }
+  70% { transform: scale(1.4); opacity: 0; }
+  100% { transform: scale(0.85); opacity: 0; }
+}
+
+.live-pulse {
+  animation: pulse-ring 1.5s ease-out infinite;
+}
+
+/* Card hover glow */
+.channel-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.channel-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 32px oklch(0.65 0.22 274 / 20%), 0 2px 8px oklch(0 0 0 / 40%);
+  border-color: oklch(0.65 0.22 274 / 40%);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: oklch(1 0 0 / 12%);
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.65 0.22 274 / 60%);
+}
+
+/* ── Volume range slider ─────────────────────────────────────────────────── */
+.volume-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 99px;
+  background: oklch(1 0 0 / 20%);
+  outline: none;
+  cursor: pointer;
+}
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: oklch(0.65 0.22 274);
+  cursor: pointer;
+  box-shadow: 0 0 6px oklch(0.65 0.22 274 / 60%);
+  transition: transform 0.15s ease;
+}
+.volume-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.3);
+}
+.volume-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: oklch(0.65 0.22 274);
+  border: none;
+  cursor: pointer;
+}
+
+/* ── Player container fullscreen controls fix ────────────────────────────── */
+:fullscreen .player-controls,
+:-webkit-full-screen .player-controls {
+  display: flex !important;
+}

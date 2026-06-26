@@ -62,10 +62,19 @@ export default function HomeClient({ initialChannels, initialFetchedAt }: HomeCl
     }
   };
 
-  // Load on mount if no SSR data
+  // Load on mount if no SSR data and handle 'watch' query param
   useEffect(() => {
     if (initialChannels.length === 0) {
       fetchChannels();
+    }
+    
+    // Check if there is a 'watch' query parameter
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const watchParam = params.get("watch");
+      if (watchParam) {
+        setSearchQuery(watchParam);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

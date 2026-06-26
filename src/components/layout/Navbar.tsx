@@ -1,8 +1,10 @@
 "use client";
 
-import { Tv2, Zap, Sun, Moon } from "lucide-react";
+import { Tv2, Zap, Sun, Moon, Trophy } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTheme } from "./ThemeProvider";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 function LiveClock() {
   const [time, setTime] = useState<Date | null>(null);
@@ -68,6 +70,7 @@ function ThemeToggle() {
 }
 
 export default function Navbar() {
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -85,21 +88,47 @@ export default function Navbar() {
       }`}
     >
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-        {/* Logo */}
-        <a href="/" className="flex items-center gap-2.5 shrink-0 group">
-          <div className="relative flex items-center justify-center w-9 h-9">
-            {/* Icon container */}
-            <div className="relative z-10 flex items-center justify-center w-9 h-9 rounded-xl gradient-brand shadow-lg">
-              <Tv2 className="w-5 h-5 text-white" />
-              <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-red-500 border-2 border-background flex items-center justify-center">
-                <span className="w-1.5 h-1.5 rounded-full bg-white live-pulse" />
-              </span>
+        {/* Logo and Nav links */}
+        <div className="flex items-center gap-6 shrink-0">
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="relative flex items-center justify-center w-9 h-9">
+              {/* Icon container */}
+              <div className="relative z-10 flex items-center justify-center w-9 h-9 rounded-xl gradient-brand shadow-lg">
+                <Tv2 className="w-5 h-5 text-white" />
+                <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-red-500 border-2 border-background flex items-center justify-center">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white live-pulse" />
+                </span>
+              </div>
             </div>
-          </div>
-          <span className="text-xl font-bold tracking-tight logo-text-shimmer group-hover:[animation-duration:1.5s] transition-all">
-            Sportzfy
-          </span>
-        </a>
+            <span className="text-xl font-bold tracking-tight logo-text-shimmer group-hover:[animation-duration:1.5s] transition-all">
+              Sportzfy
+            </span>
+          </Link>
+
+          <nav className="hidden sm:flex items-center gap-1.5 border-l border-white/10 pl-5 h-8">
+            <Link
+              href="/"
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold tracking-wide transition-all ${
+                pathname === "/"
+                  ? "bg-primary/15 text-primary border border-primary/20"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/30 border border-transparent"
+              }`}
+            >
+              Live Channels
+            </Link>
+            <Link
+              href="/world-cup"
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold tracking-wide transition-all ${
+                pathname === "/world-cup"
+                  ? "bg-amber-500/15 text-amber-400 border border-amber-500/25"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/30 border border-transparent"
+              }`}
+            >
+              <Trophy className="w-3.5 h-3.5 text-amber-400" />
+              World Cup 2026
+            </Link>
+          </nav>
+        </div>
 
         {/* Center tagline */}
         <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">

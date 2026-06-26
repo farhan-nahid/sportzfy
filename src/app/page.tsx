@@ -1,3 +1,4 @@
+import HeroSection from "@/components/home/HeroSection";
 import HomeClient from "@/components/home/HomeClient";
 import Navbar from "@/components/layout/Navbar";
 import type { Channel } from "@/data/channels";
@@ -36,42 +37,8 @@ export default async function HomePage() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
 
-      {/* Hero strip */}
-      <div className="relative overflow-hidden border-b border-white/5">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-red-500/5 pointer-events-none" />
-        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 relative z-10">
-          <div className="max-w-2xl">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight mb-3">
-              <span className="text-gradient-brand">Live Sports,</span>
-              <br />
-              <span className="text-foreground">Anywhere. Anytime.</span>
-            </h1>
-            <p className="text-muted-foreground text-base md:text-lg">
-              Stream cricket, football, basketball, tennis and more — live from
-              public IPTV feeds worldwide. Click any channel to watch instantly.
-            </p>
-
-            {/* Quick stats */}
-            <div className="flex flex-wrap items-center gap-4 mt-5">
-              {[
-                { label: "Live Now", value: liveCount || "…", color: "text-red-400" },
-                { label: "Countries", value: "10+", color: "text-primary" },
-                { label: "Sports", value: "10", color: "text-emerald-400" },
-                { label: "Channels", value: totalChannels || "…", color: "text-amber-400" },
-              ].map((stat) => (
-                <div key={stat.label} className="flex items-center gap-1.5">
-                  <span className={`text-xl font-extrabold ${stat.color}`}>
-                    {stat.value}
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    {stat.label}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Animated hero strip */}
+      <HeroSection liveCount={liveCount} totalChannels={totalChannels} />
 
       {/* Main content — client component handles filters + player */}
       <HomeClient initialChannels={channels} initialFetchedAt={fetchedAt} />
@@ -79,22 +46,13 @@ export default async function HomePage() {
       {/* Footer */}
       <footer className="mt-12 border-t border-white/5 py-6">
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 animate-fade-up">
             <span className="text-lg">📺</span>
             <span className="font-semibold text-foreground">Sportzfy</span>
-            <span>– Live Sports Streaming via IPTV</span>
+            <span>– Live Sports Streaming</span>
           </div>
           <p>
-            Powered by{" "}
-            <a
-              href="https://github.com/iptv-org/iptv"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline underline-offset-2 hover:text-foreground transition-colors"
-            >
-              iptv-org
-            </a>{" "}
-            public playlists. For personal use only.
+            For personal use only.
           </p>
         </div>
       </footer>

@@ -342,7 +342,7 @@ const StreamPlayer = forwardRef<StreamPlayerHandle, StreamPlayerProps>(
               </button>
 
               {/* Volume group */}
-              <div className="flex items-center gap-2 group/vol">
+              <div className="flex items-center gap-2">
                 <button
                   onClick={toggleMute}
                   className="w-8 h-8 rounded-lg flex items-center justify-center text-white hover:bg-white/15 transition-colors shrink-0"
@@ -351,18 +351,28 @@ const StreamPlayer = forwardRef<StreamPlayerHandle, StreamPlayerProps>(
                   <VolumeIcon level={volume} muted={muted} />
                 </button>
 
-                {/* Volume slider — expands on hover */}
-                <div className="w-0 overflow-hidden group-hover/vol:w-20 transition-all duration-200 flex items-center">
+                {/* Volume slider — always visible, styled with fill */}
+                <div className="flex items-center gap-1.5">
                   <input
                     type="range"
                     min={0}
                     max={1}
-                    step={0.05}
+                    step={0.02}
                     value={muted ? 0 : volume}
                     onChange={handleVolumeChange}
-                    className="volume-slider w-full h-1 cursor-pointer accent-primary"
+                    className="volume-slider w-20 h-1 cursor-pointer"
+                    style={{
+                      background: `linear-gradient(to right, oklch(0.65 0.22 274) 0%, oklch(0.65 0.22 274) ${
+                        (muted ? 0 : volume) * 100
+                      }%, oklch(1 0 0 / 20%) ${
+                        (muted ? 0 : volume) * 100
+                      }%, oklch(1 0 0 / 20%) 100%)`,
+                    }}
                     title="Volume"
                   />
+                  <span className="text-[10px] text-white/50 font-mono w-[2ch] text-right tabular-nums">
+                    {muted ? 0 : Math.round(volume * 100)}
+                  </span>
                 </div>
               </div>
 

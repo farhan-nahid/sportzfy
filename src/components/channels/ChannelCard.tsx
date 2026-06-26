@@ -16,11 +16,15 @@ interface ChannelCardProps {
   channel: Channel;
   onWatch: (channel: Channel) => void;
   isActive?: boolean;
+  index?: number;
 }
 
-export default function ChannelCard({ channel, onWatch, isActive = false }: ChannelCardProps) {
+export default function ChannelCard({ channel, onWatch, isActive = false, index = 0 }: ChannelCardProps) {
   const country = COUNTRIES.find((c) => c.code === channel.country);
   const sport = SPORTS.find((s) => s.value === channel.sport);
+
+  // Stagger delay capped at 600ms so large grids don't feel sluggish
+  const staggerDelay = Math.min(index * 60, 600);
 
   // Logo: URL image or emoji
   const logoIsUrl = channel.logo.startsWith("http");
@@ -28,13 +32,14 @@ export default function ChannelCard({ channel, onWatch, isActive = false }: Chan
   return (
     <div
       className={cn(
-        "channel-card group relative flex flex-col rounded-2xl border bg-card overflow-hidden cursor-pointer",
+        "card-enter channel-card group relative flex flex-col rounded-2xl border bg-card overflow-hidden cursor-pointer",
         isActive
           ? "border-primary/60 shadow-lg shadow-primary/20"
           : channel.isLive
           ? "border-white/10"
           : "border-white/8"
       )}
+      style={{ animationDelay: `${staggerDelay}ms` }}
       onClick={() => channel.isLive && onWatch(channel)}
     >
       {/* Card Header — thumbnail area */}

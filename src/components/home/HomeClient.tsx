@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import { filterChannels, type Sport, type Channel } from "@/data/channels";
 import Filters from "@/components/filters/Filters";
 import ChannelGrid from "@/components/channels/ChannelGrid";
-import { Menu, X, SlidersHorizontal, RefreshCw } from "lucide-react";
+import { Menu, X, SlidersHorizontal, RefreshCw, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface HomeClientProps {
@@ -41,6 +41,7 @@ export default function HomeClient({ initialChannels, initialFetchedAt }: HomeCl
   const [selectedCountry, setSelectedCountry] = useState("ALL");
   const [selectedSport, setSelectedSport] = useState<Sport>("All");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Fetch channels from API
   const fetchChannels = async (isRefresh = false) => {
@@ -69,10 +70,18 @@ export default function HomeClient({ initialChannels, initialFetchedAt }: HomeCl
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const filtered = useMemo(
-    () => filterChannels(channels, selectedCountry, selectedSport),
-    [channels, selectedCountry, selectedSport]
-  );
+  const filtered = useMemo(() => {
+    const byFilters = filterChannels(channels, selectedCountry, selectedSport);
+    if (!searchQuery.trim()) return byFilters;
+    const q = searchQuery.toLowerCase();
+    return byFilters.filter(
+      (ch) =>
+        ch.name.toLowerCase().includes(q) ||
+        ch.sport.toLowerCase().includes(q) ||
+        ch.country.toLowerCase().includes(q) ||
+        (ch.currentMatch?.toLowerCase().includes(q) ?? false)
+    );
+  }, [channels, selectedCountry, selectedSport, searchQuery]);
 
   const liveCount = filtered.filter((c) => c.isLive).length;
   const isFiltered = selectedCountry !== "ALL" || selectedSport !== "All";
@@ -88,7 +97,7 @@ export default function HomeClient({ initialChannels, initialFetchedAt }: HomeCl
         <aside className="hidden lg:block w-64 shrink-0">
           <div
             className="sticky top-20 rounded-2xl border border-white/8 bg-card p-5 overflow-y-auto"
-            style={{ height: "calc(100vh - 15rem)" }}
+            style={{ maxHeight: "calc(100vh - 15rem)" }}
           >
             <Filters
               selectedCountry={selectedCountry}
@@ -147,6 +156,34 @@ export default function HomeClient({ initialChannels, initialFetchedAt }: HomeCl
 
         {/* Main channel grid */}
         <main className="flex-1 min-w-0 flex flex-col">
+          {/* Search bar */}
+          <div className="relative mb-4">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+            <input
+              id="channel-search-input"
+              type="text"
+              placeholder="Search channels, sports, countries…"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={cn(
+                "w-full pl-10 pr-10 py-2.5 rounded-xl text-sm",
+                "bg-muted/20 border border-white/8",
+                "placeholder:text-muted-foreground/50 text-foreground",
+                "focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40",
+                "transition-all duration-200"
+              )}
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-muted/60 flex items-center justify-center hover:bg-muted transition-colors"
+                aria-label="Clear search"
+              >
+                <X className="w-3 h-3 text-muted-foreground" />
+              </button>
+            )}
+          </div>
+
           {/* Toolbar row */}
           <div className="flex flex-wrap items-center gap-2 mb-5">
             {/* Active filter pills */}
@@ -178,6 +215,13 @@ export default function HomeClient({ initialChannels, initialFetchedAt }: HomeCl
               </>
             )}
 
+            {/* Search result count */}
+            {searchQuery && (
+              <span className="text-xs text-muted-foreground">
+                {filtered.length} result{filtered.length !== 1 ? "s" : ""} for &ldquo;{searchQuery}&rdquo;
+              </span>
+            )}
+
             {/* Spacer */}
             <span className="flex-1" />
 
@@ -203,8 +247,8 @@ export default function HomeClient({ initialChannels, initialFetchedAt }: HomeCl
             </div>
           </div>
 
-          {/* Scrollable channel area — fixed height */}
-          <div className="flex-1 overflow-y-auto pr-1 rounded-xl" style={{ height: "calc(100vh - 15rem)" }}>
+          {/* Scrollable channel area — max height */}
+          <div className="flex-1 overflow-y-auto pr-1 rounded-xl" style={{ maxHeight: "calc(100vh - 18rem)" }}>
             {loading ? (
               <div className="space-y-8">
                 <div>
@@ -217,7 +261,7 @@ export default function HomeClient({ initialChannels, initialFetchedAt }: HomeCl
                 </div>
               </div>
             ) : (
-              <ChannelGrid channels={filtered} isFiltered={isFiltered} />
+              <ChannelGrid channels={filtered} isFiltered={isFiltered || !!searchQuery} />
             )}
           </div>
         </main>

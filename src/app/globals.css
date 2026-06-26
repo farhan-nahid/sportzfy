@@ -200,11 +200,16 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: oklch(1 0 0 / 12%);
+  background: oklch(0.5 0 0 / 20%);
   border-radius: 99px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: oklch(0.65 0.22 274 / 60%);
+}
+
+/* Light mode scrollbar */
+:root:not(.dark) ::-webkit-scrollbar-thumb {
+  background: oklch(0.6 0 0 / 25%);
 }
 
 /* ── Volume range slider ─────────────────────────────────────────────────── */
@@ -213,7 +218,6 @@
   appearance: none;
   height: 4px;
   border-radius: 99px;
-  background: oklch(1 0 0 / 20%);
   outline: none;
   cursor: pointer;
 }
@@ -244,4 +248,132 @@
 :fullscreen .player-controls,
 :-webkit-full-screen .player-controls {
   display: flex !important;
+}
+
+/* ── Hero entrance animations ─────────────────────────────────────────────── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slide-in-left {
+  from { opacity: 0; transform: translateX(-20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.animate-fade-in {
+  animation: fade-in 0.5s ease both;
+}
+.animate-slide-in-left {
+  animation: slide-in-left 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Stagger delays */
+.delay-0   { animation-delay: 0ms; }
+.delay-100 { animation-delay: 100ms; }
+.delay-150 { animation-delay: 150ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+.delay-600 { animation-delay: 600ms; }
+.delay-700 { animation-delay: 700ms; }
+.delay-800 { animation-delay: 800ms; }
+
+/* ── Background floating orbs ─────────────────────────────────────────────── */
+@keyframes orb-float-1 {
+  0%   { transform: translate(0, 0) scale(1); }
+  33%  { transform: translate(30px, -20px) scale(1.05); }
+  66%  { transform: translate(-15px, 15px) scale(0.97); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+@keyframes orb-float-2 {
+  0%   { transform: translate(0, 0) scale(1); }
+  40%  { transform: translate(-25px, 20px) scale(1.08); }
+  80%  { transform: translate(20px, -10px) scale(0.95); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+@keyframes orb-float-3 {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(15px, 25px) scale(1.04); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+.orb-1 { animation: orb-float-1 12s ease-in-out infinite; }
+.orb-2 { animation: orb-float-2 16s ease-in-out infinite; }
+.orb-3 { animation: orb-float-3 10s ease-in-out infinite; }
+
+/* ── Logo animations ──────────────────────────────────────────────────────── */
+@keyframes logo-spin-glow {
+  0%   { transform: rotate(0deg); opacity: 0.6; }
+  100% { transform: rotate(360deg); opacity: 0.6; }
+}
+@keyframes logo-shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+
+.logo-text-shimmer {
+  background: linear-gradient(
+    90deg,
+    oklch(0.75 0.2 274) 0%,
+    oklch(0.9 0.15 220) 30%,
+    oklch(0.8 0.2 260) 50%,
+    oklch(0.9 0.15 220) 70%,
+    oklch(0.75 0.2 274) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: logo-shimmer 3s linear infinite;
+}
+
+/* ── Channel card stagger entrance ───────────────────────────────────────── */
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.card-enter {
+  animation: card-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── Stat number pop ──────────────────────────────────────────────────────── */
+@keyframes stat-pop {
+  0%   { opacity: 0; transform: scale(0.7) translateY(8px); }
+  60%  { transform: scale(1.1) translateY(-2px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.stat-pop {
+  animation: stat-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* ── Gradient mesh shimmer (hero background) ─────────────────────────────── */
+@keyframes mesh-drift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.mesh-bg {
+  background: linear-gradient(
+    -45deg,
+    oklch(0.65 0.22 274 / 8%),
+    oklch(0.6 0.2 220 / 5%),
+    oklch(0.65 0.22 27 / 4%),
+    oklch(0.7 0.18 200 / 6%)
+  );
+  background-size: 400% 400%;
+  animation: mesh-drift 12s ease infinite;
 }

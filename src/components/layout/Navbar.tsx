@@ -1,10 +1,10 @@
 "use client";
 
-import { Tv2, Zap, Sun, Moon, Trophy } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useTheme } from "./ThemeProvider";
+import { Moon, Sun, Trophy, Tv2, Zap } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useTheme } from "./ThemeProvider";
 
 function LiveClock() {
   const [time, setTime] = useState<Date | null>(null);
@@ -17,8 +17,8 @@ function LiveClock() {
 
   if (!time) {
     return (
-      <div className="hidden sm:flex items-center gap-1 text-xs text-muted-foreground bg-muted/30 px-3 py-1.5 rounded-full border border-white/8">
-        <span className="font-mono font-semibold text-foreground w-[4.5rem] text-center">
+      <div className="hidden items-center gap-1 rounded-full border border-white/8 bg-muted/30 px-3 py-1.5 text-muted-foreground text-xs sm:flex">
+        <span className="w-[4.5rem] text-center font-mono font-semibold text-foreground">
           --:--:--
         </span>
         <span>Local</span>
@@ -31,7 +31,7 @@ function LiveClock() {
   const ss = time.getSeconds().toString().padStart(2, "0");
 
   return (
-    <div className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/20 px-3 py-1.5 rounded-full border border-white/8">
+    <div className="hidden items-center gap-1.5 rounded-full border border-white/8 bg-muted/20 px-3 py-1.5 text-muted-foreground text-xs sm:flex">
       <span className="font-mono font-semibold text-foreground tabular-nums">
         {hh}:{mm}
         <span className="text-primary">:{ss}</span>
@@ -47,22 +47,23 @@ function ThemeToggle() {
 
   return (
     <button
+      type="button"
       id="theme-toggle-btn"
       onClick={toggleTheme}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       title={isDark ? "Switch to light mode" : "Switch to dark mode"}
-      className="relative flex items-center justify-center w-9 h-9 rounded-xl border border-white/10 bg-muted/20 hover:bg-muted/40 hover:border-primary/40 transition-all duration-200 group overflow-hidden"
+      className="group relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-muted/20 transition-all duration-200 hover:border-primary/40 hover:bg-muted/40"
     >
       {/* Sun icon */}
       <Sun
-        className={`absolute w-4 h-4 text-amber-400 transition-all duration-300 ${
-          isDark ? "opacity-0 rotate-90 scale-50" : "opacity-100 rotate-0 scale-100"
+        className={`absolute h-4 w-4 text-amber-400 transition-all duration-300 ${
+          isDark ? "rotate-90 scale-50 opacity-0" : "rotate-0 scale-100 opacity-100"
         }`}
       />
       {/* Moon icon */}
       <Moon
-        className={`absolute w-4 h-4 text-primary transition-all duration-300 ${
-          isDark ? "opacity-100 rotate-0 scale-100" : "opacity-0 -rotate-90 scale-50"
+        className={`absolute h-4 w-4 text-primary transition-all duration-300 ${
+          isDark ? "rotate-0 scale-100 opacity-100" : "-rotate-90 scale-50 opacity-0"
         }`}
       />
     </button>
@@ -83,68 +84,68 @@ export default function Navbar() {
     <header
       className={`sticky top-0 z-50 w-full transition-all duration-300 ${
         scrolled
-          ? "border-b border-white/8 bg-background/60 backdrop-blur-xl shadow-lg shadow-black/20"
-          : "border-b border-transparent bg-transparent backdrop-blur-md"
+          ? "border-white/8 border-b bg-background/60 shadow-black/20 shadow-lg backdrop-blur-xl"
+          : "border-transparent border-b bg-transparent backdrop-blur-md"
       }`}
     >
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      <div className="mx-auto flex h-16 max-w-screen-xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         {/* Logo and Nav links */}
-        <div className="flex items-center gap-6 shrink-0">
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="relative flex items-center justify-center w-9 h-9">
+        <div className="flex shrink-0 items-center gap-6">
+          <Link href="/" className="group flex items-center gap-2.5">
+            <div className="relative flex h-9 w-9 items-center justify-center">
               {/* Icon container */}
-              <div className="relative z-10 flex items-center justify-center w-9 h-9 rounded-xl gradient-brand shadow-lg">
-                <Tv2 className="w-5 h-5 text-white" />
-                <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-red-500 border-2 border-background flex items-center justify-center">
-                  <span className="w-1.5 h-1.5 rounded-full bg-white live-pulse" />
+              <div className="gradient-brand relative z-10 flex h-9 w-9 items-center justify-center rounded-xl shadow-lg">
+                <Tv2 className="h-5 w-5 text-white" />
+                <span className="absolute -top-1 -right-1 flex h-3 w-3 items-center justify-center rounded-full border-2 border-background bg-red-500">
+                  <span className="live-pulse h-1.5 w-1.5 rounded-full bg-white" />
                 </span>
               </div>
             </div>
-            <span className="text-xl font-bold tracking-tight logo-text-shimmer group-hover:[animation-duration:1.5s] transition-all">
+            <span className="logo-text-shimmer font-bold text-xl tracking-tight transition-all group-hover:[animation-duration:1.5s]">
               Sportzfy
             </span>
           </Link>
 
-          <nav className="hidden sm:flex items-center gap-1.5 border-l border-white/10 pl-5 h-8">
+          <nav className="hidden h-8 items-center gap-1.5 border-white/10 border-l pl-5 sm:flex">
             <Link
               href="/"
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold tracking-wide transition-all ${
+              className={`rounded-lg px-3 py-1.5 font-semibold text-xs tracking-wide transition-all ${
                 pathname === "/"
-                  ? "bg-primary/15 text-primary border border-primary/20"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/30 border border-transparent"
+                  ? "border border-primary/20 bg-primary/15 text-primary"
+                  : "border border-transparent text-muted-foreground hover:bg-muted/30 hover:text-foreground"
               }`}
             >
               Live Channels
             </Link>
             <Link
               href="/world-cup"
-              className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold tracking-wide transition-all ${
+              className={`flex items-center gap-1 rounded-lg px-3 py-1.5 font-semibold text-xs tracking-wide transition-all ${
                 pathname === "/world-cup"
-                  ? "bg-amber-500/15 text-amber-400 border border-amber-500/25"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/30 border border-transparent"
+                  ? "border border-amber-500/25 bg-amber-500/15 text-amber-400"
+                  : "border border-transparent text-muted-foreground hover:bg-muted/30 hover:text-foreground"
               }`}
             >
-              <Trophy className="w-3.5 h-3.5 text-amber-400" />
+              <Trophy className="h-3.5 w-3.5 text-amber-400" />
               World Cup 2026
             </Link>
           </nav>
         </div>
 
         {/* Center tagline */}
-        <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
-          <Zap className="w-4 h-4 text-primary" />
+        <div className="hidden items-center gap-2 text-muted-foreground text-sm md:flex">
+          <Zap className="h-4 w-4 text-primary" />
           <span>Live Sports. Any Country. Any Sport.</span>
         </div>
 
         {/* Right */}
         <div className="flex items-center gap-3">
           {/* Live badge */}
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/20">
+          <div className="flex items-center gap-1.5 rounded-full border border-red-500/20 bg-red-500/10 px-3 py-1.5">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500" />
             </span>
-            <span className="text-xs font-semibold text-red-400">LIVE</span>
+            <span className="font-semibold text-red-400 text-xs">LIVE</span>
           </div>
 
           {/* Live clock */}

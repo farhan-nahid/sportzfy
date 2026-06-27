@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, DM_Mono } from "next/font/google";
+import { DM_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import ThemeProvider from "@/components/layout/ThemeProvider";
 
@@ -62,7 +62,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${inter.variable} ${dmMono.variable} antialiased min-h-screen bg-background`}
+        className={`${inter.variable} ${dmMono.variable} min-h-screen bg-background antialiased`}
       >
         <ThemeProvider>{children}</ThemeProvider>
       </body>

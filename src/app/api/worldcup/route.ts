@@ -11,7 +11,7 @@ export async function GET() {
         headers: {
           "User-Agent": "Sportzfy/1.0",
         },
-      }
+      },
     );
 
     if (!res.ok) {
@@ -23,9 +23,11 @@ export async function GET() {
 
     // Helper to format match items
     const formatMatch = (m: any): any => {
-      const homeName = m.Home?.TeamName?.[0]?.Description || m.Home?.Abbreviation || "TBD";
-      const awayName = m.Away?.TeamName?.[0]?.Description || m.Away?.Abbreviation || "TBD";
-      
+      const homeName =
+        m.Home?.TeamName?.[0]?.Description || m.Home?.Abbreviation || "TBD";
+      const awayName =
+        m.Away?.TeamName?.[0]?.Description || m.Away?.Abbreviation || "TBD";
+
       let stage = m.StageName?.[0]?.Description || "First Stage";
       if (m.GroupName?.[0]?.Description) {
         stage = `${stage} - ${m.GroupName[0].Description}`;
@@ -52,8 +54,12 @@ export async function GET() {
         },
         stats: {
           possession: {
-            home: m.BallPossession?.OverallHome ? Math.round(m.BallPossession.OverallHome) : 50,
-            away: m.BallPossession?.OverallAway ? Math.round(m.BallPossession.OverallAway) : 50,
+            home: m.BallPossession?.OverallHome
+              ? Math.round(m.BallPossession.OverallHome)
+              : 50,
+            away: m.BallPossession?.OverallAway
+              ? Math.round(m.BallPossession.OverallAway)
+              : 50,
           },
           shots: { home: 10, away: 8 },
           shotsOnTarget: { home: 4, away: 3 },
@@ -65,16 +71,19 @@ export async function GET() {
         },
         events: [],
         matchNumber: m.MatchNumber || null,
-        attendance: m.Attendance ? parseInt(m.Attendance).toLocaleString() : null,
-        weather: m.Weather ? {
-          temp: m.Weather.Temperature || null,
-          humidity: m.Weather.Humidity || null,
-          condition: m.Weather.TypeLocalized?.[0]?.Description || null,
-        } : null,
-        officials: m.Officials?.map((o: any) => ({
-          name: o.NameShort?.[0]?.Description || o.Name?.[0]?.Description || "Unknown",
-          role: o.TypeLocalized?.[0]?.Description || "Official",
-        })) || [],
+        attendance: m.Attendance ? parseInt(m.Attendance, 10).toLocaleString() : null,
+        weather: m.Weather
+          ? {
+              temp: m.Weather.Temperature || null,
+              humidity: m.Weather.Humidity || null,
+              condition: m.Weather.TypeLocalized?.[0]?.Description || null,
+            }
+          : null,
+        officials:
+          m.Officials?.map((o: any) => ({
+            name: o.NameShort?.[0]?.Description || o.Name?.[0]?.Description || "Unknown",
+            role: o.TypeLocalized?.[0]?.Description || "Official",
+          })) || [],
       };
     };
 
@@ -163,7 +172,7 @@ export async function GET() {
             b.points - a.points ||
             b.goalDifference - a.goalDifference ||
             b.goalsFor - a.goalsFor ||
-            a.team.localeCompare(b.team)
+            a.team.localeCompare(b.team),
         )
         .map((team: any, index: number) => ({
           rank: index + 1,
@@ -181,13 +190,16 @@ export async function GET() {
     // Sort recent finished results, newest first
     const recentResults = allFormattedMatches
       .filter((m: any) => m.status === "FINISHED")
-      .sort((a: any, b: any) => b.date.localeCompare(a.date) || b.time.localeCompare(a.time))
-      .slice(0, 12);
+      .sort(
+        (a: any, b: any) => b.date.localeCompare(a.date) || b.time.localeCompare(a.time),
+      );
 
     // Sort upcoming scheduled fixtures, oldest first
     const upcomingMatches = allFormattedMatches
       .filter((m: any) => m.status === "SCHEDULED")
-      .sort((a: any, b: any) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
+      .sort(
+        (a: any, b: any) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time),
+      );
 
     return NextResponse.json(
       {
@@ -200,13 +212,18 @@ export async function GET() {
         headers: {
           "Cache-Control": "s-maxage=300, stale-while-revalidate=60",
         },
-      }
+      },
     );
   } catch (error: any) {
     console.error("[/api/worldcup] Error fetching FIFA matches:", error);
     return NextResponse.json(
-      { error: "Failed to load World Cup data", upcomingMatches: [], recentResults: [], standings: [] },
-      { status: 502 }
+      {
+        error: "Failed to load World Cup data",
+        upcomingMatches: [],
+        recentResults: [],
+        standings: [],
+      },
+      { status: 502 },
     );
   }
 }
@@ -218,8 +235,8 @@ function getBroadcastChannel(matchId: string): string {
     "Fox Sports 2 (480p)",
     "ESPNU (720p)",
     "Fox Deportes (1280p)",
-    "ESPN Deportes (360p)"
+    "ESPN Deportes (360p)",
   ];
-  const num = parseInt(matchId) || 0;
+  const num = parseInt(matchId, 10) || 0;
   return channels[num % channels.length];
 }

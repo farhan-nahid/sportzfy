@@ -1,280 +1,559 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-import { filterChannels, type Sport, type Channel } from "@/data/channels";
-import Filters from "@/components/filters/Filters";
-import ChannelGrid from "@/components/channels/ChannelGrid";
-import { Menu, X, SlidersHorizontal, RefreshCw, Search } from "lucide-react";
+import { Play, RefreshCw, Search, Server, Tv, X } from "lucide-react";
+import Image from "next/image";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { ChannelCategory, EzChannel } from "@/data/ezchannels";
+import { CATEGORIES } from "@/data/ezchannels";
 import { cn } from "@/lib/utils";
 
-interface HomeClientProps {
-  initialChannels: Channel[];
-  initialFetchedAt: string | null;
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+interface GroupTeam {
+  rank: number;
+  team: string;
+  code: string;
+  played: number;
+  won: number;
+  drawn: number;
+  lost: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDifference: number;
+  points: number;
 }
 
-// Loading skeleton card
-function SkeletonCard() {
+interface Group {
+  name: string;
+  standings: GroupTeam[];
+}
+
+const COUNTRY_CODE: Record<string, string> = {
+  MEX: "mx",
+  RSA: "za",
+  KOR: "kr",
+  CZE: "cz",
+  SUI: "ch",
+  CAN: "ca",
+  BIH: "ba",
+  QAT: "qa",
+  BRA: "br",
+  MAR: "ma",
+  SCO: "gb-sct",
+  HAI: "ht",
+  USA: "us",
+  AUS: "au",
+  PAR: "py",
+  TUR: "tr",
+  GER: "de",
+  CIV: "ci",
+  ECU: "ec",
+  POR: "pt",
+  ARG: "ar",
+  FRA: "fr",
+  ENG: "gb-eng",
+  ESP: "es",
+  ITA: "it",
+  NED: "nl",
+  BEL: "be",
+  URU: "uy",
+  JPN: "jp",
+  COL: "co",
+  SEN: "sn",
+  DEN: "dk",
+  POL: "pl",
+  IRN: "ir",
+  SWE: "se",
+  NZL: "nz",
+  GHA: "gh",
+  HON: "hn",
+  CHI: "cl",
+  GBR: "gb",
+  OMA: "om",
+  CMR: "cm",
+  CRC: "cr",
+  NGA: "ng",
+  CHN: "cn",
+  IRQ: "iq",
+  NOR: "no",
+  KSA: "sa",
+  AUT: "at",
+  TUN: "tn",
+  PAN: "pa",
+  UKR: "ua",
+  PER: "pe",
+  EGY: "eg",
+  ROU: "ro",
+  FIN: "fi",
+  HUN: "hu",
+  SVN: "si",
+  SVK: "sk",
+  GEO: "ge",
+  ALB: "al",
+  ALG: "dz",
+  CIV2: "ci",
+  COD: "cd",
+  CPV: "cv",
+  JOR: "jo",
+  UZB: "uz",
+  CRO: "hr",
+  VEN: "ve",
+  BOL: "bo",
+  CUW: "cw",
+};
+
+function flagUrl(code: string): string {
+  const iso = COUNTRY_CODE[code?.toUpperCase()] || code?.toLowerCase();
+  return `https://flagcdn.com/w40/${iso}.png`;
+}
+
+// ── Channel Card ──────────────────────────────────────────────────────────────
+
+function ChannelCard({
+  channel,
+  isPlaying,
+  onClick,
+}: {
+  channel: EzChannel;
+  isPlaying: boolean;
+  onClick: (ch: EzChannel) => void;
+}) {
   return (
-    <div className="rounded-2xl border border-white/8 bg-card overflow-hidden animate-pulse">
-      <div className="h-40 bg-muted/40" />
-      <div className="p-4 space-y-3">
-        <div className="h-3 bg-muted/50 rounded-full w-3/4" />
-        <div className="h-2.5 bg-muted/30 rounded-full w-full" />
-        <div className="h-2.5 bg-muted/30 rounded-full w-4/5" />
-        <div className="flex gap-1.5 mt-2">
-          <div className="h-4 bg-muted/30 rounded-full w-16" />
-          <div className="h-4 bg-muted/30 rounded-full w-20" />
+    <button
+      type="button"
+      onClick={() => onClick(channel)}
+      className={cn(
+        "ez-channel-card group relative block w-full cursor-pointer overflow-hidden rounded-2xl border text-left",
+        "bg-white/[0.04]",
+        isPlaying
+          ? "border-[#e94560]/60 shadow-[#e94560]/10 shadow-lg"
+          : "border-white/[0.06] hover:border-[#e94560]/40",
+      )}
+    >
+      {/* Blurred logo backdrop */}
+      <div className="pointer-events-none absolute inset-0 opacity-20 transition-opacity group-hover:opacity-30">
+        <Image
+          src={channel.logo}
+          alt=""
+          fill
+          unoptimized
+          loading="eager"
+          className="scale-110 object-cover blur-xl"
+          onError={(e) => ((e.target as HTMLImageElement).style.display = "none")}
+        />
+      </div>
+
+      {/* Card body */}
+      <div className="relative p-4">
+        <div className="flex items-center gap-4">
+          {/* Logo */}
+          <div className="relative flex-shrink-0">
+            <Image
+              src={channel.logo}
+              alt={channel.name}
+              width={64}
+              height={64}
+              unoptimized
+              loading="eager"
+              className="h-16 w-16 rounded-xl border border-white/10 bg-white/5 object-cover shadow-lg transition-all group-hover:border-[#e94560]/30"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src =
+                  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23222'/%3E%3Ctext x='50%25' y='55%25' font-size='28' text-anchor='middle' fill='%23888'%3E📺%3C/text%3E%3C/svg%3E";
+              }}
+            />
+            {isPlaying && (
+              <span className="absolute -top-1 -right-1 h-3.5 w-3.5 animate-pulse rounded-full border-2 border-black bg-[#e94560]" />
+            )}
+          </div>
+
+          {/* Info */}
+          <div className="min-w-0 flex-1">
+            <h3 className="mb-1.5 truncate font-semibold text-[15px] transition-colors group-hover:text-[#e94560]">
+              {channel.name}
+            </h3>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-md border border-[#e94560]/20 bg-[#e94560]/10 px-2 py-0.5 font-medium text-[#e94560] text-xs capitalize">
+                {channel.category}
+              </span>
+              <span className="font-medium text-gray-500 text-xs">{channel.quality}</span>
+              {channel.servers.length > 1 && (
+                <span className="flex items-center gap-0.5 text-gray-600 text-xs">
+                  <Server className="h-3 w-3" />
+                  {channel.servers.length}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Play button */}
+          <div
+            className={cn(
+              "flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl transition-all duration-300",
+              "group-hover:scale-110 group-hover:shadow-[#e94560]/25 group-hover:shadow-lg",
+              isPlaying
+                ? "bg-[#e94560]"
+                : "bg-gradient-to-br from-[#e94560] to-[#c73452]",
+            )}
+          >
+            <Play className="ml-0.5 h-4 w-4 fill-white text-white" />
+          </div>
         </div>
       </div>
-      <div className="px-4 pb-4">
-        <div className="h-9 bg-muted/30 rounded-xl" />
+    </button>
+  );
+}
+
+// ── Inline HLS / iframe Player ────────────────────────────────────────────────
+
+function InlinePlayer({
+  channel,
+  serverIdx,
+  onServerChange,
+  onClose,
+}: {
+  channel: EzChannel;
+  serverIdx: number;
+  onServerChange: (i: number) => void;
+  onClose: () => void;
+}) {
+  const server = channel.servers[serverIdx];
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const hlsRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (server.type !== "hls") return;
+    const video = videoRef.current;
+    if (!video) return;
+
+    let destroyed = false;
+
+    async function load() {
+      // Dynamic import so HLS.js is only loaded client-side
+      const { default: Hls } = await import("hls.js");
+      if (destroyed || !video) return;
+
+      if (Hls.isSupported()) {
+        hlsRef.current?.destroy();
+        const hls = new Hls({ enableWorker: true });
+        hlsRef.current = hls;
+        hls.loadSource(server.url);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          video.play().catch(() => {});
+        });
+      } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+        video.src = server.url;
+        video.play().catch(() => {});
+      }
+    }
+
+    void load();
+    return () => {
+      destroyed = true;
+      hlsRef.current?.destroy();
+      hlsRef.current = null;
+    };
+  }, [server]);
+
+  return (
+    <div className="mb-6 w-full animate-fade-in overflow-hidden rounded-2xl border border-white/10 bg-black/60">
+      {/* Player header */}
+      <div className="flex items-center justify-between border-white/8 border-b bg-white/5 px-4 py-3">
+        <div className="flex items-center gap-3">
+          <Image
+            src={channel.logo}
+            alt={channel.name}
+            width={28}
+            height={28}
+            unoptimized
+            className="h-7 w-7 rounded-lg border border-white/10 object-cover"
+            onError={(e) => ((e.target as HTMLImageElement).style.display = "none")}
+          />
+          <div>
+            <p className="font-semibold text-sm text-white">{channel.name}</p>
+            <p className="text-gray-400 text-xs capitalize">{channel.category}</p>
+          </div>
+          <span className="flex items-center gap-1 rounded-full border border-[#e94560]/20 bg-[#e94560]/10 px-2 py-0.5 font-bold text-[#e94560] text-[10px]">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#e94560]" />
+            LIVE
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/5 text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
+          aria-label="Close player"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+
+      {/* Video / iframe */}
+      <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
+        <div className="absolute inset-0">
+          {server.type === "iframe" ? (
+            <iframe
+              src={server.url}
+              title="Live Channel Stream"
+              className="h-full w-full"
+              allowFullScreen
+              allow="autoplay; fullscreen"
+              style={{ border: "none" }}
+            />
+          ) : (
+            <video
+              ref={videoRef}
+              className="h-full w-full bg-black"
+              controls
+              autoPlay
+              playsInline
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Server switcher */}
+      {channel.servers.length > 1 && (
+        <div className="border-white/8 border-t bg-white/5 px-4 py-3">
+          <p className="mb-2 font-medium text-gray-500 text-xs uppercase tracking-wider">
+            Servers
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {channel.servers.map((srv, i) => (
+              <button
+                type="button"
+                key={`${srv.name}-${srv.url}`}
+                onClick={() => onServerChange(i)}
+                className={cn(
+                  "whitespace-nowrap rounded-lg border px-3 py-1.5 font-medium text-xs transition-all",
+                  i === serverIdx
+                    ? "border-[#e94560] bg-[#e94560] text-white shadow-[#e94560]/30 shadow-md"
+                    : "border-white/10 bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white",
+                )}
+              >
+                {srv.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Skeleton ──────────────────────────────────────────────────────────────────
+
+function ChannelSkeleton() {
+  return (
+    <div className="animate-pulse overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.04] p-4">
+      <div className="flex items-center gap-4">
+        <div className="h-16 w-16 flex-shrink-0 rounded-xl bg-white/10" />
+        <div className="flex-1 space-y-2">
+          <div className="h-4 w-3/4 rounded-full bg-white/10" />
+          <div className="flex gap-2">
+            <div className="h-3 w-16 rounded-full bg-white/8" />
+            <div className="h-3 w-10 rounded-full bg-white/8" />
+          </div>
+        </div>
+        <div className="h-11 w-11 flex-shrink-0 rounded-xl bg-white/10" />
       </div>
     </div>
   );
 }
 
-export default function HomeClient({ initialChannels, initialFetchedAt }: HomeClientProps) {
-  const [channels, setChannels] = useState<Channel[]>(initialChannels);
+// ── Main Component ─────────────────────────────────────────────────────────────
+
+interface HomeClientProps {
+  initialChannels: EzChannel[];
+}
+
+export default function HomeClient({ initialChannels }: HomeClientProps) {
+  const [channels, setChannels] = useState<EzChannel[]>(initialChannels);
   const [loading, setLoading] = useState(initialChannels.length === 0);
-  const [fetchedAt, setFetchedAt] = useState<string | null>(initialFetchedAt);
-  const [refreshing, setRefreshing] = useState(false);
-  const [selectedCountry, setSelectedCountry] = useState("ALL");
-  const [selectedSport, setSelectedSport] = useState<Sport>("All");
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const [activeCategory, setActiveCategory] = useState<ChannelCategory | "all">("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Fetch channels from API
-  const fetchChannels = async (isRefresh = false) => {
-    if (isRefresh) setRefreshing(true);
-    else setLoading(true);
+  const [activeChannel, setActiveChannel] = useState<EzChannel | null>(null);
+  const [serverIdx, setServerIdx] = useState(0);
 
+  const playerRef = useRef<HTMLDivElement>(null);
+
+  // Fetch channels if SSR returned empty
+  const fetchChannels = useCallback(async () => {
     try {
       const res = await fetch("/api/channels");
-      if (!res.ok) throw new Error("API error");
+      if (!res.ok) return;
       const data = await res.json();
       setChannels(data.channels ?? []);
-      setFetchedAt(data.fetchedAt ?? null);
     } catch (err) {
       console.error("Failed to fetch channels:", err);
     } finally {
       setLoading(false);
-      setRefreshing(false);
     }
-  };
-
-  // Load on mount if no SSR data and handle 'watch' query param
-  useEffect(() => {
-    if (initialChannels.length === 0) {
-      fetchChannels();
-    }
-    
-    // Check if there is a 'watch' query parameter
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const watchParam = params.get("watch");
-      if (watchParam) {
-        setSearchQuery(watchParam);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (initialChannels.length === 0) {
+      void fetchChannels();
+    }
+  }, [fetchChannels, initialChannels.length]);
+
+  // Filtered channels
   const filtered = useMemo(() => {
-    const byFilters = filterChannels(channels, selectedCountry, selectedSport);
-    if (!searchQuery.trim()) return byFilters;
+    const list =
+      activeCategory === "all"
+        ? channels
+        : channels.filter((c) => c.category === activeCategory);
+
+    if (!searchQuery.trim()) return list;
     const q = searchQuery.toLowerCase();
-    return byFilters.filter(
-      (ch) =>
-        ch.name.toLowerCase().includes(q) ||
-        ch.sport.toLowerCase().includes(q) ||
-        ch.country.toLowerCase().includes(q) ||
-        (ch.currentMatch?.toLowerCase().includes(q) ?? false)
+    return list.filter(
+      (c) =>
+        c.name.toLowerCase().includes(q) ||
+        c.category.toLowerCase().includes(q) ||
+        c.nowPlaying.toLowerCase().includes(q),
     );
-  }, [channels, selectedCountry, selectedSport, searchQuery]);
+  }, [channels, activeCategory, searchQuery]);
 
-  const liveCount = filtered.filter((c) => c.isLive).length;
-  const isFiltered = selectedCountry !== "ALL" || selectedSport !== "All";
+  const handlePlay = (ch: EzChannel) => {
+    setActiveChannel(ch);
+    setServerIdx(0);
+    // Scroll to player
+    setTimeout(
+      () => playerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      50,
+    );
+  };
 
-  const formattedFetchedAt = fetchedAt
-    ? new Date(fetchedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-    : null;
+  const handleClose = () => {
+    setActiveChannel(null);
+    setServerIdx(0);
+  };
+
+  const totalCount = channels.length;
+  const categoryCount =
+    activeCategory === "all"
+      ? totalCount
+      : channels.filter((c) => c.category === activeCategory).length;
 
   return (
-    <div className="flex-1 max-w-screen-xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6">
-      <div className="flex gap-6 relative">
-        {/* Sidebar — desktop */}
-        <aside className="hidden lg:block w-64 shrink-0">
-          <div
-            className="sticky top-20 rounded-2xl border border-white/8 bg-card p-5 overflow-y-auto"
-            style={{ maxHeight: "calc(100vh - 15rem)" }}
-          >
-            <Filters
-              selectedCountry={selectedCountry}
-              selectedSport={selectedSport}
-              onCountryChange={setSelectedCountry}
-              onSportChange={setSelectedSport}
-              liveCount={liveCount}
-              totalCount={filtered.length}
-            />
-          </div>
-        </aside>
+    <main className="mx-auto w-full max-w-screen-xl flex-1 px-4 py-6 sm:px-6 lg:px-8">
+      {/* ── Inline Player ──────────────────────────────────────────────────── */}
+      <div ref={playerRef}>
+        {activeChannel && (
+          <InlinePlayer
+            channel={activeChannel}
+            serverIdx={serverIdx}
+            onServerChange={setServerIdx}
+            onClose={handleClose}
+          />
+        )}
+      </div>
 
-        {/* Mobile filter button */}
-        <div className="lg:hidden fixed bottom-5 right-5 z-50">
-          <button
-            id="mobile-filter-btn"
-            onClick={() => setSidebarOpen(true)}
-            className="flex items-center gap-2 px-4 py-3 rounded-2xl gradient-brand text-white font-semibold shadow-2xl shadow-primary/40 text-sm"
-          >
-            <SlidersHorizontal className="w-4 h-4" />
-            Filters
-            {isFiltered && (
-              <span className="w-2 h-2 rounded-full bg-white/80" />
-            )}
-          </button>
+      {/* ── Header row ─────────────────────────────────────────────────────── */}
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="flex items-center gap-2 font-bold text-lg tracking-tight">
+            <Tv className="h-5 w-5 text-[#e94560]" />
+            Live TV
+          </h2>
+          <p className="mt-0.5 text-gray-500 text-xs">
+            {categoryCount} channel{categoryCount !== 1 ? "s" : ""} available
+          </p>
         </div>
 
-        {/* Mobile sidebar drawer */}
-        {sidebarOpen && (
-          <div className="lg:hidden fixed inset-0 z-50 flex">
+        {/* Search */}
+        <div className="relative w-full sm:w-64">
+          <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-500" />
+          <input
+            id="channel-search"
+            type="text"
+            placeholder="Search channels…"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full rounded-xl border border-white/8 bg-white/5 py-2 pr-8 pl-9 text-sm text-white transition-all placeholder:text-gray-600 focus:border-[#e94560]/30 focus:outline-none focus:ring-2 focus:ring-[#e94560]/30"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery("")}
+              className="absolute top-1/2 right-2.5 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-white/20"
+            >
+              <X className="h-3 w-3 text-gray-400" />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* ── Category Filter Tabs ────────────────────────────────────────────── */}
+      <div className="scrollbar-hide mb-5 flex items-center gap-2 overflow-x-auto pb-3">
+        {CATEGORIES.map((cat) => (
+          <button
+            type="button"
+            key={cat.value}
+            id={`filter-${cat.value}`}
+            onClick={() => setActiveCategory(cat.value as ChannelCategory | "all")}
+            className={cn(
+              "flex items-center gap-1.5 whitespace-nowrap rounded-xl border px-5 py-2.5 font-medium text-sm transition-all",
+              activeCategory === cat.value
+                ? "border-[#e94560] bg-[#e94560] text-white shadow-[#e94560]/20 shadow-lg"
+                : "border-white/[0.06] bg-white/5 text-gray-400 hover:bg-white/8 hover:text-white",
+            )}
+          >
+            <span>{cat.icon}</span>
+            {cat.label}
+          </button>
+        ))}
+      </div>
+
+      {/* ── Channel Grid ────────────────────────────────────────────────────── */}
+      {loading ? (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {Array.from({ length: 12 }, (_, i) => `channel-skeleton-${i}`).map((id) => (
+            <ChannelSkeleton key={id} />
+          ))}
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="flex flex-col items-center justify-center gap-4 py-24 text-center">
+          <Tv className="h-14 w-14 text-gray-700" />
+          <div>
+            <h3 className="mb-1 font-semibold text-white">No channels found</h3>
+            <p className="text-gray-500 text-sm">
+              {searchQuery
+                ? `No results for "${searchQuery}".`
+                : `No channels in this category right now.`}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setActiveCategory("all");
+              setSearchQuery("");
+            }}
+            className="mt-2 flex items-center gap-2 rounded-xl bg-[#e94560] px-4 py-2 font-medium text-sm text-white transition-colors hover:bg-[#c73452]"
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+            Show all channels
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {filtered.map((ch, i) => (
             <div
-              className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-              onClick={() => setSidebarOpen(false)}
-            />
-            <div className="relative ml-auto w-72 h-full bg-card border-l border-white/8 p-5 overflow-y-auto">
-              <div className="flex items-center justify-between mb-5">
-                <span className="font-semibold text-sm">Filters</span>
-                <button
-                  onClick={() => setSidebarOpen(false)}
-                  className="w-8 h-8 rounded-lg bg-muted/40 flex items-center justify-center hover:bg-muted/60 transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-              <Filters
-                selectedCountry={selectedCountry}
-                selectedSport={selectedSport}
-                onCountryChange={(c) => { setSelectedCountry(c); setSidebarOpen(false); }}
-                onSportChange={(s) => { setSelectedSport(s); setSidebarOpen(false); }}
-                liveCount={liveCount}
-                totalCount={filtered.length}
+              key={ch.id}
+              className="card-enter"
+              style={{ animationDelay: `${i * 40}ms` }}
+            >
+              <ChannelCard
+                channel={ch}
+                isPlaying={activeChannel?.id === ch.id}
+                onClick={handlePlay}
               />
             </div>
-          </div>
-        )}
-
-        {/* Main channel grid */}
-        <main className="flex-1 min-w-0 flex flex-col">
-          {/* Search bar */}
-          <div className="relative mb-4">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-            <input
-              id="channel-search-input"
-              type="text"
-              placeholder="Search channels, sports, countries…"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className={cn(
-                "w-full pl-10 pr-10 py-2.5 rounded-xl text-sm",
-                "bg-muted/20 border border-white/8",
-                "placeholder:text-muted-foreground/50 text-foreground",
-                "focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40",
-                "transition-all duration-200"
-              )}
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-muted/60 flex items-center justify-center hover:bg-muted transition-colors"
-                aria-label="Clear search"
-              >
-                <X className="w-3 h-3 text-muted-foreground" />
-              </button>
-            )}
-          </div>
-
-          {/* Toolbar row */}
-          <div className="flex flex-wrap items-center gap-2 mb-5">
-            {/* Active filter pills */}
-            {isFiltered && (
-              <>
-                <span className="text-xs text-muted-foreground">Showing:</span>
-                {selectedCountry !== "ALL" && (
-                  <button
-                    onClick={() => setSelectedCountry("ALL")}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors"
-                  >
-                    {selectedCountry} ×
-                  </button>
-                )}
-                {selectedSport !== "All" && (
-                  <button
-                    onClick={() => setSelectedSport("All")}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors"
-                  >
-                    {selectedSport} ×
-                  </button>
-                )}
-                <button
-                  onClick={() => { setSelectedCountry("ALL"); setSelectedSport("All"); }}
-                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Clear all
-                </button>
-              </>
-            )}
-
-            {/* Search result count */}
-            {searchQuery && (
-              <span className="text-xs text-muted-foreground">
-                {filtered.length} result{filtered.length !== 1 ? "s" : ""} for &ldquo;{searchQuery}&rdquo;
-              </span>
-            )}
-
-            {/* Spacer */}
-            <span className="flex-1" />
-
-            {/* Refresh + last fetched */}
-            <div className="flex items-center gap-2">
-              {formattedFetchedAt && (
-                <span className="text-[10px] text-muted-foreground/60 hidden sm:block">
-                  Updated {formattedFetchedAt}
-                </span>
-              )}
-              <button
-                id="refresh-channels-btn"
-                onClick={() => fetchChannels(true)}
-                disabled={refreshing || loading}
-                className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border border-white/8 bg-muted/20 hover:bg-muted/40 transition-colors",
-                  (refreshing || loading) && "opacity-50 cursor-not-allowed"
-                )}
-              >
-                <RefreshCw className={cn("w-3 h-3", refreshing && "animate-spin")} />
-                Refresh
-              </button>
-            </div>
-          </div>
-
-          {/* Scrollable channel area — max height */}
-          <div className="flex-1 overflow-y-auto pr-1 rounded-xl" style={{ maxHeight: "calc(100vh - 18rem)" }}>
-            {loading ? (
-              <div className="space-y-8">
-                <div>
-                  <div className="h-7 bg-muted/30 rounded-full w-32 mb-4 animate-pulse" />
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-                    {Array.from({ length: 6 }).map((_, i) => (
-                      <SkeletonCard key={i} />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <ChannelGrid channels={filtered} isFiltered={isFiltered || !!searchQuery} />
-            )}
-          </div>
-        </main>
-      </div>
-    </div>
+          ))}
+        </div>
+      )}
+    </main>
   );
 }

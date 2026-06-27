@@ -63,7 +63,7 @@ export const SPORTS: { label: string; value: Sport; emoji: string }[] = [
 export function filterChannels(
   channels: Channel[],
   country: string,
-  sport: Sport
+  sport: Sport,
 ): Channel[] {
   return channels.filter((ch) => {
     const matchCountry = country === "ALL" || ch.country === country;

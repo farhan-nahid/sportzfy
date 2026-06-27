@@ -5,20 +5,23 @@ const NOTICE_TEXT =
 
 export default function HeroSection() {
   // Duplicate text so the loop is seamless
-  const doubled = [NOTICE_TEXT, NOTICE_TEXT];
+  const doubled = [
+    { id: "notice-1", text: NOTICE_TEXT },
+    { id: "notice-2", text: NOTICE_TEXT },
+  ];
 
   return (
-    <div className="bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-blue-600/10 border-b border-white/5">
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center gap-3">
-        <span className="flex-shrink-0 w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
-        <div className="marquee-container flex-1 min-w-0">
+    <div className="border-white/5 border-b bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-blue-600/10">
+      <div className="mx-auto flex max-w-screen-xl items-center gap-3 px-4 py-2.5 sm:px-6 lg:px-8">
+        <span className="h-2 w-2 flex-shrink-0 animate-pulse rounded-full bg-blue-400" />
+        <div className="marquee-container min-w-0 flex-1">
           <span
-            className="marquee-track text-sm text-blue-300"
+            className="marquee-track text-blue-300 text-sm"
             style={{ animationDuration: "55s" }}
           >
-            {doubled.map((text, i) => (
-              <span key={i} className="marquee-item">
-                {text}
+            {doubled.map((item) => (
+              <span key={item.id} className="marquee-item">
+                {item.text}
               </span>
             ))}
           </span>

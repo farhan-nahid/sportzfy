@@ -1,6 +1,6 @@
+import type { Metadata } from "next";
 import Navbar from "@/components/layout/Navbar";
 import WorldCupClient from "@/components/worldcup/WorldCupClient";
-import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "FIFA World Cup 2026 – Standings, Scores & Rankings | Sportzfy",
@@ -17,23 +17,21 @@ export const metadata: Metadata = {
 
 export default function WorldCupPage() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="flex min-h-screen flex-col">
       <Navbar />
 
       {/* Main Content */}
       <WorldCupClient />
 
       {/* Footer */}
-      <footer className="mt-12 border-t border-white/5 py-6">
-        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
-          <div className="flex items-center gap-2 animate-fade-up">
+      <footer className="mt-12 border-white/5 border-t py-6">
+        <div className="mx-auto flex max-w-screen-xl flex-col items-center justify-between gap-3 px-4 text-muted-foreground text-xs sm:flex-row sm:px-6 lg:px-8">
+          <div className="flex animate-fade-up items-center gap-2">
             <span className="text-lg">📺</span>
             <span className="font-semibold text-foreground">Sportzfy</span>
             <span>– Live Sports Streaming</span>
           </div>
-          <p>
-            For personal use only.
-          </p>
+          <p>For personal use only.</p>
         </div>
       </footer>
     </div>

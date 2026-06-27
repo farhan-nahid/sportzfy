@@ -40,13 +40,41 @@ export const EZ_CHANNELS: EzChannel[] = [
     servers: [
       { name: "WC 2026", url: "https://tahmidx.cinemoja.workers.dev/", type: "hls" },
       { name: "BEIN 1", url: "https://cp11.adabmedia.com/hls2/sport.m3u8", type: "hls" },
-      { name: "TOFFEE", url: "https://toffee-proxy.shahriar-diu64.workers.dev/https://prod-cdn01-live.toffeelive.com/live/FIFA-2026-4/0/master_2000.m3u8", type: "hls" },
-      { name: "TOFFEE 2", url: "https://tv.ezshomadhan.com/toffee-player", type: "iframe" },
-      { name: "BEIN 2 (Adab)", url: "https://live.adabmedia.com/hls/bein1.m3u8", type: "hls" },
-      { name: "ESPN", url: "https://1nyaler.streamhostingcdn.top/stream/97/index.m3u8", type: "hls" },
-      { name: "CBS", url: "https://tx3.nexgen.bz:4000/CBS_SPORTS/index.m3u8", type: "hls" },
-      { name: "TSports (Live)", url: "https://103.59.176.72:8083/live1/tracks-v1a1/mono.m3u8?token=123", type: "hls" },
-      { name: "Adab Live", url: "https://live.adabmedia.com/hls/sport.m3u8", type: "hls" },
+      {
+        name: "TOFFEE",
+        url: "https://toffee-proxy.shahriar-diu64.workers.dev/https://prod-cdn01-live.toffeelive.com/live/FIFA-2026-4/0/master_2000.m3u8",
+        type: "hls",
+      },
+      {
+        name: "TOFFEE 2",
+        url: "https://tv.ezshomadhan.com/toffee-player",
+        type: "iframe",
+      },
+      {
+        name: "BEIN 2 (Adab)",
+        url: "https://live.adabmedia.com/hls/bein1.m3u8",
+        type: "hls",
+      },
+      {
+        name: "ESPN",
+        url: "https://1nyaler.streamhostingcdn.top/stream/97/index.m3u8",
+        type: "hls",
+      },
+      {
+        name: "CBS",
+        url: "https://tx3.nexgen.bz:4000/CBS_SPORTS/index.m3u8",
+        type: "hls",
+      },
+      {
+        name: "TSports (Live)",
+        url: "https://103.59.176.72:8083/live1/tracks-v1a1/mono.m3u8?token=123",
+        type: "hls",
+      },
+      {
+        name: "Adab Live",
+        url: "https://live.adabmedia.com/hls/sport.m3u8",
+        type: "hls",
+      },
     ],
   },
   {
@@ -57,9 +85,21 @@ export const EZ_CHANNELS: EzChannel[] = [
     quality: "HD",
     nowPlaying: "Sports News",
     servers: [
-      { name: "Server 1", url: "https://bdix.my.id/onair/e.php?channel=tsports", type: "iframe" },
-      { name: "Server 2", url: "https://bdix.my.id/onair/e.php?channel=tsports2", type: "iframe" },
-      { name: "Server 3", url: "https://103.59.176.72:8083/live1/tracks-v1a1/mono.m3u8?token=123", type: "hls" },
+      {
+        name: "Server 1",
+        url: "https://bdix.my.id/onair/e.php?channel=tsports",
+        type: "iframe",
+      },
+      {
+        name: "Server 2",
+        url: "https://bdix.my.id/onair/e.php?channel=tsports2",
+        type: "iframe",
+      },
+      {
+        name: "Server 3",
+        url: "https://103.59.176.72:8083/live1/tracks-v1a1/mono.m3u8?token=123",
+        type: "hls",
+      },
     ],
   },
   {
@@ -70,8 +110,16 @@ export const EZ_CHANNELS: EzChannel[] = [
     quality: "HD",
     nowPlaying: "Sports",
     servers: [
-      { name: "Server 1", url: "https://f7ccf7fc.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/UmFrdXRlblRWLXB0X0ZJRkFQbHVzUG9ydHVndWVzZV9ITFM/playlist.m3u8", type: "hls" },
-      { name: "Server 2", url: "https://d2w9q46ikgrcwx.cloudfront.net/v1/manifest/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-of5cbk3sav3w5/be940823-4a17-4fbf-8cd4-ea282e368008/1.m3u8", type: "hls" },
+      {
+        name: "Server 1",
+        url: "https://f7ccf7fc.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/UmFrdXRlblRWLXB0X0ZJRkFQbHVzUG9ydHVndWVzZV9ITFM/playlist.m3u8",
+        type: "hls",
+      },
+      {
+        name: "Server 2",
+        url: "https://d2w9q46ikgrcwx.cloudfront.net/v1/manifest/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-of5cbk3sav3w5/be940823-4a17-4fbf-8cd4-ea282e368008/1.m3u8",
+        type: "hls",
+      },
     ],
   },
 
@@ -84,8 +132,16 @@ export const EZ_CHANNELS: EzChannel[] = [
     quality: "HD",
     nowPlaying: "News Hour",
     servers: [
-      { name: "Somoy TV", url: "https://live.thebosstv.com:30443/dwlive/Somoy-TV/chunks.m3u8", type: "hls" },
-      { name: "Server 1", url: "https://bdix.my.id/onair/e.php?channel=somoy", type: "iframe" },
+      {
+        name: "Somoy TV",
+        url: "https://live.thebosstv.com:30443/dwlive/Somoy-TV/chunks.m3u8",
+        type: "hls",
+      },
+      {
+        name: "Server 1",
+        url: "https://bdix.my.id/onair/e.php?channel=somoy",
+        type: "iframe",
+      },
     ],
   },
   {
@@ -96,7 +152,11 @@ export const EZ_CHANNELS: EzChannel[] = [
     quality: "HD",
     nowPlaying: "Live News",
     servers: [
-      { name: "Server 1", url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1716/output/index.m3u8", type: "hls" },
+      {
+        name: "Server 1",
+        url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1716/output/index.m3u8",
+        type: "hls",
+      },
     ],
   },
   {
@@ -107,7 +167,11 @@ export const EZ_CHANNELS: EzChannel[] = [
     quality: "HD",
     nowPlaying: "News",
     servers: [
-      { name: "Server 1", url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1702/output/index.m3u8", type: "hls" },
+      {
+        name: "Server 1",
+        url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1702/output/index.m3u8",
+        type: "hls",
+      },
     ],
   },
   {
@@ -118,7 +182,11 @@ export const EZ_CHANNELS: EzChannel[] = [
     quality: "HD",
     nowPlaying: "News",
     servers: [
-      { name: "Server 1", url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1701/output/index.m3u8", type: "hls" },
+      {
+        name: "Server 1",
+        url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1701/output/index.m3u8",
+        type: "hls",
+      },
     ],
   },
   {
@@ -129,7 +197,11 @@ export const EZ_CHANNELS: EzChannel[] = [
     quality: "HD",
     nowPlaying: "News",
     servers: [
-      { name: "Server 1", url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1709/output/index.m3u8", type: "hls" },
+      {
+        name: "Server 1",
+        url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1709/output/index.m3u8",
+        type: "hls",
+      },
     ],
   },
   {
@@ -140,7 +212,11 @@ export const EZ_CHANNELS: EzChannel[] = [
     quality: "HD",
     nowPlaying: "News",
     servers: [
-      { name: "Server 1", url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1703/output/index.m3u8", type: "hls" },
+      {
+        name: "Server 1",
+        url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1703/output/index.m3u8",
+        type: "hls",
+      },
     ],
   },
   {
@@ -151,7 +227,11 @@ export const EZ_CHANNELS: EzChannel[] = [
     quality: "HD",
     nowPlaying: "News",
     servers: [
-      { name: "Server 1", url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1708/output/index.m3u8", type: "hls" },
+      {
+        name: "Server 1",
+        url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1708/output/index.m3u8",
+        type: "hls",
+      },
     ],
   },
   {
@@ -162,7 +242,11 @@ export const EZ_CHANNELS: EzChannel[] = [
     quality: "HD",
     nowPlaying: "News",
     servers: [
-      { name: "Server 1", url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1710/output/index.m3u8", type: "hls" },
+      {
+        name: "Server 1",
+        url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1710/output/index.m3u8",
+        type: "hls",
+      },
     ],
   },
   {
@@ -173,7 +257,11 @@ export const EZ_CHANNELS: EzChannel[] = [
     quality: "HD",
     nowPlaying: "News",
     servers: [
-      { name: "Server 1", url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1705/output/index.m3u8", type: "hls" },
+      {
+        name: "Server 1",
+        url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1705/output/index.m3u8",
+        type: "hls",
+      },
     ],
   },
 
@@ -186,7 +274,11 @@ export const EZ_CHANNELS: EzChannel[] = [
     quality: "HD",
     nowPlaying: "Drama",
     servers: [
-      { name: "Server 1", url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1800/output/index.m3u8", type: "hls" },
+      {
+        name: "Server 1",
+        url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1800/output/index.m3u8",
+        type: "hls",
+      },
     ],
   },
   {
@@ -197,7 +289,11 @@ export const EZ_CHANNELS: EzChannel[] = [
     quality: "HD",
     nowPlaying: "Drama",
     servers: [
-      { name: "Server 1", url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1801/output/index.m3u8", type: "hls" },
+      {
+        name: "Server 1",
+        url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1801/output/index.m3u8",
+        type: "hls",
+      },
     ],
   },
   {
@@ -208,7 +304,11 @@ export const EZ_CHANNELS: EzChannel[] = [
     quality: "HD",
     nowPlaying: "Show",
     servers: [
-      { name: "Server 1", url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1802/output/index.m3u8", type: "hls" },
+      {
+        name: "Server 1",
+        url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1802/output/index.m3u8",
+        type: "hls",
+      },
     ],
   },
   {
@@ -219,7 +319,11 @@ export const EZ_CHANNELS: EzChannel[] = [
     quality: "HD",
     nowPlaying: "Reality Show",
     servers: [
-      { name: "Server 1", url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1803/output/index.m3u8", type: "hls" },
+      {
+        name: "Server 1",
+        url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1803/output/index.m3u8",
+        type: "hls",
+      },
     ],
   },
 
@@ -232,7 +336,11 @@ export const EZ_CHANNELS: EzChannel[] = [
     quality: "HD",
     nowPlaying: "Music",
     servers: [
-      { name: "Server 1", url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1900/output/index.m3u8", type: "hls" },
+      {
+        name: "Server 1",
+        url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1900/output/index.m3u8",
+        type: "hls",
+      },
     ],
   },
   {
@@ -243,7 +351,11 @@ export const EZ_CHANNELS: EzChannel[] = [
     quality: "HD",
     nowPlaying: "Music",
     servers: [
-      { name: "Server 1", url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1901/output/index.m3u8", type: "hls" },
+      {
+        name: "Server 1",
+        url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1901/output/index.m3u8",
+        type: "hls",
+      },
     ],
   },
 
@@ -256,7 +368,11 @@ export const EZ_CHANNELS: EzChannel[] = [
     quality: "HD",
     nowPlaying: "World News",
     servers: [
-      { name: "Server 1", url: "https://live-hls-web-aje.getaj.net/AJE/index.m3u8", type: "hls" },
+      {
+        name: "Server 1",
+        url: "https://live-hls-web-aje.getaj.net/AJE/index.m3u8",
+        type: "hls",
+      },
     ],
   },
   {
@@ -267,7 +383,11 @@ export const EZ_CHANNELS: EzChannel[] = [
     quality: "HD",
     nowPlaying: "World News",
     servers: [
-      { name: "Server 1", url: "https://a.files.bbci.co.uk/media/live/manifesto/audio_video/simulcast/hls/uk/hd/ak/bbc_world_news_english.m3u8", type: "hls" },
+      {
+        name: "Server 1",
+        url: "https://a.files.bbci.co.uk/media/live/manifesto/audio_video/simulcast/hls/uk/hd/ak/bbc_world_news_english.m3u8",
+        type: "hls",
+      },
     ],
   },
   {
@@ -278,12 +398,20 @@ export const EZ_CHANNELS: EzChannel[] = [
     quality: "HD",
     nowPlaying: "International News",
     servers: [
-      { name: "Server 1", url: "https://dwamdstream104.akamaized.net/hls/live/2015530/dwstream104/index.m3u8", type: "hls" },
+      {
+        name: "Server 1",
+        url: "https://dwamdstream104.akamaized.net/hls/live/2015530/dwstream104/index.m3u8",
+        type: "hls",
+      },
     ],
   },
 ];
 
-export const CATEGORIES: { label: string; value: ChannelCategory | "all"; icon: string }[] = [
+export const CATEGORIES: {
+  label: string;
+  value: ChannelCategory | "all";
+  icon: string;
+}[] = [
   { label: "All", value: "all", icon: "📺" },
   { label: "Sports", value: "sports", icon: "🏆" },
   { label: "News", value: "news", icon: "📰" },

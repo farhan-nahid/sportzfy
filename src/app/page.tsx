@@ -11,7 +11,9 @@ async function getChannels(): Promise<EzChannel[]> {
   try {
     const baseUrl =
       process.env.NEXT_PUBLIC_APP_URL ??
-      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+      (process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : "http://localhost:3000");
 
     const res = await fetch(`${baseUrl}/api/channels`, {
       next: { revalidate: 86400 },
@@ -29,7 +31,7 @@ export default async function HomePage() {
   const channels = await getChannels();
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="flex min-h-screen flex-col">
       <Navbar />
 
       {/* Marquee notice banner */}
@@ -39,9 +41,9 @@ export default async function HomePage() {
       <HomeClient initialChannels={channels} />
 
       {/* Footer */}
-      <footer className="mt-12 border-t border-white/5 py-6">
-        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
-          <div className="flex items-center gap-2 animate-fade-up">
+      <footer className="mt-12 border-white/5 border-t py-6">
+        <div className="mx-auto flex max-w-screen-xl flex-col items-center justify-between gap-3 px-4 text-muted-foreground text-xs sm:flex-row sm:px-6 lg:px-8">
+          <div className="flex animate-fade-up items-center gap-2">
             <span className="text-lg">📺</span>
             <span className="font-semibold text-foreground">Sportzfy</span>
             <span>– Live Sports Streaming</span>

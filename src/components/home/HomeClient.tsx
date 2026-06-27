@@ -1,10 +1,11 @@
 "use client";
 
+import { Play, RefreshCw, Search, Server, Tv, X } from "lucide-react";
+import Image from "next/image";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ChannelCategory, EzChannel } from "@/data/ezchannels";
 import { CATEGORIES } from "@/data/ezchannels";
 import { cn } from "@/lib/utils";
-import { Play, RefreshCw, Search, Server, Tv, X } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -28,18 +29,77 @@ interface Group {
 }
 
 const COUNTRY_CODE: Record<string, string> = {
-  MEX: "mx", RSA: "za", KOR: "kr", CZE: "cz", SUI: "ch", CAN: "ca",
-  BIH: "ba", QAT: "qa", BRA: "br", MAR: "ma", SCO: "gb-sct", HAI: "ht",
-  USA: "us", AUS: "au", PAR: "py", TUR: "tr", GER: "de", CIV: "ci",
-  ECU: "ec", POR: "pt", ARG: "ar", FRA: "fr", ENG: "gb-eng", ESP: "es",
-  ITA: "it", NED: "nl", BEL: "be", URU: "uy", JPN: "jp", COL: "co",
-  SEN: "sn", DEN: "dk", POL: "pl", IRN: "ir", SWE: "se", NZL: "nz",
-  GHA: "gh", HON: "hn", CHI: "cl", GBR: "gb", OMA: "om", CMR: "cm",
-  CRC: "cr", NGA: "ng", CHN: "cn", IRQ: "iq", NOR: "no", KSA: "sa",
-  AUT: "at", TUN: "tn", PAN: "pa", UKR: "ua", PER: "pe", EGY: "eg",
-  ROU: "ro", FIN: "fi", HUN: "hu", SVN: "si", SVK: "sk", GEO: "ge",
-  ALB: "al", ALG: "dz", CIV2: "ci", COD: "cd", CPV: "cv", JOR: "jo",
-  UZB: "uz", CRO: "hr", VEN: "ve", BOL: "bo", CUW: "cw",
+  MEX: "mx",
+  RSA: "za",
+  KOR: "kr",
+  CZE: "cz",
+  SUI: "ch",
+  CAN: "ca",
+  BIH: "ba",
+  QAT: "qa",
+  BRA: "br",
+  MAR: "ma",
+  SCO: "gb-sct",
+  HAI: "ht",
+  USA: "us",
+  AUS: "au",
+  PAR: "py",
+  TUR: "tr",
+  GER: "de",
+  CIV: "ci",
+  ECU: "ec",
+  POR: "pt",
+  ARG: "ar",
+  FRA: "fr",
+  ENG: "gb-eng",
+  ESP: "es",
+  ITA: "it",
+  NED: "nl",
+  BEL: "be",
+  URU: "uy",
+  JPN: "jp",
+  COL: "co",
+  SEN: "sn",
+  DEN: "dk",
+  POL: "pl",
+  IRN: "ir",
+  SWE: "se",
+  NZL: "nz",
+  GHA: "gh",
+  HON: "hn",
+  CHI: "cl",
+  GBR: "gb",
+  OMA: "om",
+  CMR: "cm",
+  CRC: "cr",
+  NGA: "ng",
+  CHN: "cn",
+  IRQ: "iq",
+  NOR: "no",
+  KSA: "sa",
+  AUT: "at",
+  TUN: "tn",
+  PAN: "pa",
+  UKR: "ua",
+  PER: "pe",
+  EGY: "eg",
+  ROU: "ro",
+  FIN: "fi",
+  HUN: "hu",
+  SVN: "si",
+  SVK: "sk",
+  GEO: "ge",
+  ALB: "al",
+  ALG: "dz",
+  CIV2: "ci",
+  COD: "cd",
+  CPV: "cv",
+  JOR: "jo",
+  UZB: "uz",
+  CRO: "hr",
+  VEN: "ve",
+  BOL: "bo",
+  CUW: "cw",
 };
 
 function flagUrl(code: string): string {
@@ -59,26 +119,26 @@ function ChannelCard({
   onClick: (ch: EzChannel) => void;
 }) {
   return (
-    <div
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => e.key === "Enter" && onClick(channel)}
+    <button
+      type="button"
       onClick={() => onClick(channel)}
       className={cn(
-        "ez-channel-card group relative rounded-2xl overflow-hidden cursor-pointer border",
+        "ez-channel-card group relative block w-full cursor-pointer overflow-hidden rounded-2xl border text-left",
         "bg-white/[0.04]",
         isPlaying
-          ? "border-[#e94560]/60 shadow-lg shadow-[#e94560]/10"
-          : "border-white/[0.06] hover:border-[#e94560]/40"
+          ? "border-[#e94560]/60 shadow-[#e94560]/10 shadow-lg"
+          : "border-white/[0.06] hover:border-[#e94560]/40",
       )}
     >
       {/* Blurred logo backdrop */}
-      <div className="absolute inset-0 opacity-20 group-hover:opacity-30 transition-opacity pointer-events-none">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+      <div className="pointer-events-none absolute inset-0 opacity-20 transition-opacity group-hover:opacity-30">
+        <Image
           src={channel.logo}
           alt=""
-          className="w-full h-full object-cover blur-xl scale-110"
+          fill
+          unoptimized
+          loading="eager"
+          className="scale-110 object-cover blur-xl"
           onError={(e) => ((e.target as HTMLImageElement).style.display = "none")}
         />
       </div>
@@ -88,34 +148,37 @@ function ChannelCard({
         <div className="flex items-center gap-4">
           {/* Logo */}
           <div className="relative flex-shrink-0">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={channel.logo}
               alt={channel.name}
-              className="w-16 h-16 rounded-xl object-cover bg-white/5 border border-white/10 group-hover:border-[#e94560]/30 transition-all shadow-lg"
+              width={64}
+              height={64}
+              unoptimized
+              loading="eager"
+              className="h-16 w-16 rounded-xl border border-white/10 bg-white/5 object-cover shadow-lg transition-all group-hover:border-[#e94560]/30"
               onError={(e) => {
                 (e.target as HTMLImageElement).src =
                   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23222'/%3E%3Ctext x='50%25' y='55%25' font-size='28' text-anchor='middle' fill='%23888'%3E📺%3C/text%3E%3C/svg%3E";
               }}
             />
             {isPlaying && (
-              <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#e94560] rounded-full border-2 border-black animate-pulse" />
+              <span className="absolute -top-1 -right-1 h-3.5 w-3.5 animate-pulse rounded-full border-2 border-black bg-[#e94560]" />
             )}
           </div>
 
           {/* Info */}
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-[15px] truncate group-hover:text-[#e94560] transition-colors mb-1.5">
+          <div className="min-w-0 flex-1">
+            <h3 className="mb-1.5 truncate font-semibold text-[15px] transition-colors group-hover:text-[#e94560]">
               {channel.name}
             </h3>
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs px-2 py-0.5 rounded-md bg-[#e94560]/10 text-[#e94560] font-medium border border-[#e94560]/20 capitalize">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-md border border-[#e94560]/20 bg-[#e94560]/10 px-2 py-0.5 font-medium text-[#e94560] text-xs capitalize">
                 {channel.category}
               </span>
-              <span className="text-xs text-gray-500 font-medium">{channel.quality}</span>
+              <span className="font-medium text-gray-500 text-xs">{channel.quality}</span>
               {channel.servers.length > 1 && (
-                <span className="text-xs text-gray-600 flex items-center gap-0.5">
-                  <Server className="w-3 h-3" />
+                <span className="flex items-center gap-0.5 text-gray-600 text-xs">
+                  <Server className="h-3 w-3" />
                   {channel.servers.length}
                 </span>
               )}
@@ -125,18 +188,18 @@ function ChannelCard({
           {/* Play button */}
           <div
             className={cn(
-              "w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300",
-              "group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-[#e94560]/25",
+              "flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl transition-all duration-300",
+              "group-hover:scale-110 group-hover:shadow-[#e94560]/25 group-hover:shadow-lg",
               isPlaying
                 ? "bg-[#e94560]"
-                : "bg-gradient-to-br from-[#e94560] to-[#c73452]"
+                : "bg-gradient-to-br from-[#e94560] to-[#c73452]",
             )}
           >
-            <Play className="w-4 h-4 text-white fill-white ml-0.5" />
+            <Play className="ml-0.5 h-4 w-4 fill-white text-white" />
           </div>
         </div>
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -184,7 +247,7 @@ function InlinePlayer({
       }
     }
 
-    load();
+    void load();
     return () => {
       destroyed = true;
       hlsRef.current?.destroy();
@@ -193,32 +256,35 @@ function InlinePlayer({
   }, [server]);
 
   return (
-    <div className="w-full bg-black/60 border border-white/10 rounded-2xl overflow-hidden mb-6 animate-fade-in">
+    <div className="mb-6 w-full animate-fade-in overflow-hidden rounded-2xl border border-white/10 bg-black/60">
       {/* Player header */}
-      <div className="flex items-center justify-between px-4 py-3 bg-white/5 border-b border-white/8">
+      <div className="flex items-center justify-between border-white/8 border-b bg-white/5 px-4 py-3">
         <div className="flex items-center gap-3">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src={channel.logo}
             alt={channel.name}
-            className="w-7 h-7 rounded-lg object-cover border border-white/10"
+            width={28}
+            height={28}
+            unoptimized
+            className="h-7 w-7 rounded-lg border border-white/10 object-cover"
             onError={(e) => ((e.target as HTMLImageElement).style.display = "none")}
           />
           <div>
-            <p className="text-sm font-semibold text-white">{channel.name}</p>
-            <p className="text-xs text-gray-400 capitalize">{channel.category}</p>
+            <p className="font-semibold text-sm text-white">{channel.name}</p>
+            <p className="text-gray-400 text-xs capitalize">{channel.category}</p>
           </div>
-          <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#e94560]/10 border border-[#e94560]/20 text-[10px] font-bold text-[#e94560]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#e94560] animate-pulse" />
+          <span className="flex items-center gap-1 rounded-full border border-[#e94560]/20 bg-[#e94560]/10 px-2 py-0.5 font-bold text-[#e94560] text-[10px]">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#e94560]" />
             LIVE
           </span>
         </div>
         <button
+          type="button"
           onClick={onClose}
-          className="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors text-gray-400 hover:text-white"
+          className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/5 text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
           aria-label="Close player"
         >
-          <X className="w-4 h-4" />
+          <X className="h-4 w-4" />
         </button>
       </div>
 
@@ -228,7 +294,8 @@ function InlinePlayer({
           {server.type === "iframe" ? (
             <iframe
               src={server.url}
-              className="w-full h-full"
+              title="Live Channel Stream"
+              className="h-full w-full"
               allowFullScreen
               allow="autoplay; fullscreen"
               style={{ border: "none" }}
@@ -236,7 +303,7 @@ function InlinePlayer({
           ) : (
             <video
               ref={videoRef}
-              className="w-full h-full bg-black"
+              className="h-full w-full bg-black"
               controls
               autoPlay
               playsInline
@@ -247,20 +314,21 @@ function InlinePlayer({
 
       {/* Server switcher */}
       {channel.servers.length > 1 && (
-        <div className="px-4 py-3 bg-white/5 border-t border-white/8">
-          <p className="text-xs text-gray-500 mb-2 font-medium uppercase tracking-wider">
+        <div className="border-white/8 border-t bg-white/5 px-4 py-3">
+          <p className="mb-2 font-medium text-gray-500 text-xs uppercase tracking-wider">
             Servers
           </p>
           <div className="flex flex-wrap gap-2">
             {channel.servers.map((srv, i) => (
               <button
-                key={i}
+                type="button"
+                key={`${srv.name}-${srv.url}`}
                 onClick={() => onServerChange(i)}
                 className={cn(
-                  "px-3 py-1.5 rounded-lg text-xs font-medium transition-all border whitespace-nowrap",
+                  "whitespace-nowrap rounded-lg border px-3 py-1.5 font-medium text-xs transition-all",
                   i === serverIdx
-                    ? "bg-[#e94560] text-white border-[#e94560] shadow-md shadow-[#e94560]/30"
-                    : "bg-white/5 text-gray-400 border-white/10 hover:text-white hover:bg-white/10"
+                    ? "border-[#e94560] bg-[#e94560] text-white shadow-[#e94560]/30 shadow-md"
+                    : "border-white/10 bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white",
                 )}
               >
                 {srv.name}
@@ -277,17 +345,17 @@ function InlinePlayer({
 
 function ChannelSkeleton() {
   return (
-    <div className="rounded-2xl border border-white/[0.06] bg-white/[0.04] overflow-hidden animate-pulse p-4">
+    <div className="animate-pulse overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.04] p-4">
       <div className="flex items-center gap-4">
-        <div className="w-16 h-16 rounded-xl bg-white/10 flex-shrink-0" />
+        <div className="h-16 w-16 flex-shrink-0 rounded-xl bg-white/10" />
         <div className="flex-1 space-y-2">
-          <div className="h-4 bg-white/10 rounded-full w-3/4" />
+          <div className="h-4 w-3/4 rounded-full bg-white/10" />
           <div className="flex gap-2">
-            <div className="h-3 bg-white/8 rounded-full w-16" />
-            <div className="h-3 bg-white/8 rounded-full w-10" />
+            <div className="h-3 w-16 rounded-full bg-white/8" />
+            <div className="h-3 w-10 rounded-full bg-white/8" />
           </div>
         </div>
-        <div className="w-11 h-11 rounded-xl bg-white/10 flex-shrink-0" />
+        <div className="h-11 w-11 flex-shrink-0 rounded-xl bg-white/10" />
       </div>
     </div>
   );
@@ -326,12 +394,14 @@ export default function HomeClient({ initialChannels }: HomeClientProps) {
   }, []);
 
   useEffect(() => {
-    if (initialChannels.length === 0) fetchChannels();
+    if (initialChannels.length === 0) {
+      void fetchChannels();
+    }
   }, [fetchChannels, initialChannels.length]);
 
   // Filtered channels
   const filtered = useMemo(() => {
-    let list =
+    const list =
       activeCategory === "all"
         ? channels
         : channels.filter((c) => c.category === activeCategory);
@@ -342,7 +412,7 @@ export default function HomeClient({ initialChannels }: HomeClientProps) {
       (c) =>
         c.name.toLowerCase().includes(q) ||
         c.category.toLowerCase().includes(q) ||
-        c.nowPlaying.toLowerCase().includes(q)
+        c.nowPlaying.toLowerCase().includes(q),
     );
   }, [channels, activeCategory, searchQuery]);
 
@@ -350,7 +420,10 @@ export default function HomeClient({ initialChannels }: HomeClientProps) {
     setActiveChannel(ch);
     setServerIdx(0);
     // Scroll to player
-    setTimeout(() => playerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+    setTimeout(
+      () => playerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      50,
+    );
   };
 
   const handleClose = () => {
@@ -365,8 +438,7 @@ export default function HomeClient({ initialChannels }: HomeClientProps) {
       : channels.filter((c) => c.category === activeCategory).length;
 
   return (
-    <main className="flex-1 max-w-screen-xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6">
-
+    <main className="mx-auto w-full max-w-screen-xl flex-1 px-4 py-6 sm:px-6 lg:px-8">
       {/* ── Inline Player ──────────────────────────────────────────────────── */}
       <div ref={playerRef}>
         {activeChannel && (
@@ -380,51 +452,53 @@ export default function HomeClient({ initialChannels }: HomeClientProps) {
       </div>
 
       {/* ── Header row ─────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-bold tracking-tight flex items-center gap-2">
-            <Tv className="w-5 h-5 text-[#e94560]" />
+          <h2 className="flex items-center gap-2 font-bold text-lg tracking-tight">
+            <Tv className="h-5 w-5 text-[#e94560]" />
             Live TV
           </h2>
-          <p className="text-xs text-gray-500 mt-0.5">
+          <p className="mt-0.5 text-gray-500 text-xs">
             {categoryCount} channel{categoryCount !== 1 ? "s" : ""} available
           </p>
         </div>
 
         {/* Search */}
         <div className="relative w-full sm:w-64">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+          <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-500" />
           <input
             id="channel-search"
             type="text"
             placeholder="Search channels…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-8 py-2 rounded-xl text-sm bg-white/5 border border-white/8 placeholder:text-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-[#e94560]/30 focus:border-[#e94560]/30 transition-all"
+            className="w-full rounded-xl border border-white/8 bg-white/5 py-2 pr-8 pl-9 text-sm text-white transition-all placeholder:text-gray-600 focus:border-[#e94560]/30 focus:outline-none focus:ring-2 focus:ring-[#e94560]/30"
           />
           {searchQuery && (
             <button
+              type="button"
               onClick={() => setSearchQuery("")}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+              className="absolute top-1/2 right-2.5 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-white/20"
             >
-              <X className="w-3 h-3 text-gray-400" />
+              <X className="h-3 w-3 text-gray-400" />
             </button>
           )}
         </div>
       </div>
 
       {/* ── Category Filter Tabs ────────────────────────────────────────────── */}
-      <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-3 mb-5">
+      <div className="scrollbar-hide mb-5 flex items-center gap-2 overflow-x-auto pb-3">
         {CATEGORIES.map((cat) => (
           <button
+            type="button"
             key={cat.value}
             id={`filter-${cat.value}`}
             onClick={() => setActiveCategory(cat.value as ChannelCategory | "all")}
             className={cn(
-              "flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all border",
+              "flex items-center gap-1.5 whitespace-nowrap rounded-xl border px-5 py-2.5 font-medium text-sm transition-all",
               activeCategory === cat.value
-                ? "bg-[#e94560] text-white border-[#e94560] shadow-lg shadow-[#e94560]/20"
-                : "bg-white/5 text-gray-400 border-white/[0.06] hover:text-white hover:bg-white/8"
+                ? "border-[#e94560] bg-[#e94560] text-white shadow-[#e94560]/20 shadow-lg"
+                : "border-white/[0.06] bg-white/5 text-gray-400 hover:bg-white/8 hover:text-white",
             )}
           >
             <span>{cat.icon}</span>
@@ -435,34 +509,42 @@ export default function HomeClient({ initialChannels }: HomeClientProps) {
 
       {/* ── Channel Grid ────────────────────────────────────────────────────── */}
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {Array.from({ length: 12 }).map((_, i) => (
-            <ChannelSkeleton key={i} />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {Array.from({ length: 12 }, (_, i) => `channel-skeleton-${i}`).map((id) => (
+            <ChannelSkeleton key={id} />
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-24 gap-4 text-center">
-          <Tv className="w-14 h-14 text-gray-700" />
+        <div className="flex flex-col items-center justify-center gap-4 py-24 text-center">
+          <Tv className="h-14 w-14 text-gray-700" />
           <div>
-            <h3 className="font-semibold text-white mb-1">No channels found</h3>
-            <p className="text-sm text-gray-500">
+            <h3 className="mb-1 font-semibold text-white">No channels found</h3>
+            <p className="text-gray-500 text-sm">
               {searchQuery
                 ? `No results for "${searchQuery}".`
                 : `No channels in this category right now.`}
             </p>
           </div>
           <button
-            onClick={() => { setActiveCategory("all"); setSearchQuery(""); }}
-            className="mt-2 flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-[#e94560] text-white hover:bg-[#c73452] transition-colors"
+            type="button"
+            onClick={() => {
+              setActiveCategory("all");
+              setSearchQuery("");
+            }}
+            className="mt-2 flex items-center gap-2 rounded-xl bg-[#e94560] px-4 py-2 font-medium text-sm text-white transition-colors hover:bg-[#c73452]"
           >
-            <RefreshCw className="w-3.5 h-3.5" />
+            <RefreshCw className="h-3.5 w-3.5" />
             Show all channels
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filtered.map((ch, i) => (
-            <div key={ch.id} className="card-enter" style={{ animationDelay: `${i * 40}ms` }}>
+            <div
+              key={ch.id}
+              className="card-enter"
+              style={{ animationDelay: `${i * 40}ms` }}
+            >
               <ChannelCard
                 channel={ch}
                 isPlaying={activeChannel?.id === ch.id}

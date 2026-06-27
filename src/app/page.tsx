@@ -1,47 +1,42 @@
 import HeroSection from "@/components/home/HeroSection";
 import HomeClient from "@/components/home/HomeClient";
 import Navbar from "@/components/layout/Navbar";
-import type { Channel } from "@/data/channels";
+import type { EzChannel } from "@/data/ezchannels";
 
 /**
- * Fetch channels server-side for fast initial render.
+ * Fetch curated channels server-side for fast initial render.
  * Falls back to empty array if the API is unavailable.
  */
-async function getChannels(): Promise<{ channels: Channel[]; fetchedAt: string | null }> {
+async function getChannels(): Promise<EzChannel[]> {
   try {
-    // In production, call the absolute URL; in development use relative
     const baseUrl =
       process.env.NEXT_PUBLIC_APP_URL ??
       (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
 
     const res = await fetch(`${baseUrl}/api/channels`, {
-      next: { revalidate: 3600 },
+      next: { revalidate: 86400 },
     });
 
-    if (!res.ok) return { channels: [], fetchedAt: null };
+    if (!res.ok) return [];
     const data = await res.json();
-    return { channels: data.channels ?? [], fetchedAt: data.fetchedAt ?? null };
+    return data.channels ?? [];
   } catch {
-    // During build / when API isn't yet running, return empty — client will fetch
-    return { channels: [], fetchedAt: null };
+    return [];
   }
 }
 
 export default async function HomePage() {
-  const { channels, fetchedAt } = await getChannels();
-
-  const totalChannels = channels.length;
-  const liveCount = channels.filter((c) => c.isLive).length;
+  const channels = await getChannels();
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
 
-      {/* Animated hero strip */}
-      <HeroSection liveCount={liveCount} totalChannels={totalChannels} />
+      {/* Marquee notice banner */}
+      <HeroSection />
 
-      {/* Main content — client component handles filters + player */}
-      <HomeClient initialChannels={channels} initialFetchedAt={fetchedAt} />
+      {/* Main content — channel grid + player + WC standings */}
+      <HomeClient initialChannels={channels} />
 
       {/* Footer */}
       <footer className="mt-12 border-t border-white/5 py-6">
@@ -51,9 +46,7 @@ export default async function HomePage() {
             <span className="font-semibold text-foreground">Sportzfy</span>
             <span>– Live Sports Streaming</span>
           </div>
-          <p>
-            For personal use only.
-          </p>
+          <p>For personal use only.</p>
         </div>
       </footer>
     </div>

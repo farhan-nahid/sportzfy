@@ -1,35 +1,20 @@
-import { IPTV_SPORTS_PLAYLIST_URL, parseM3UToChannels } from "@/lib/iptv";
+import { EZ_CHANNELS } from "@/data/ezchannels";
 import { NextResponse } from "next/server";
 
-export const revalidate = 3600; // ISR: re-fetch every 1 hour
+// Static curated channel list — no external fetch needed
+export const dynamic = "force-static";
 
 export async function GET() {
-  try {
-    const res = await fetch(IPTV_SPORTS_PLAYLIST_URL, {
-      next: { revalidate: 3600 },
-      headers: { "User-Agent": "Sportzfy/1.0" },
-    });
-
-    if (!res.ok) {
-      throw new Error(`Playlist fetch failed: ${res.status} ${res.statusText}`);
+  return NextResponse.json(
+    {
+      channels: EZ_CHANNELS,
+      fetchedAt: new Date().toISOString(),
+      total: EZ_CHANNELS.length,
+    },
+    {
+      headers: {
+        "Cache-Control": "s-maxage=86400, stale-while-revalidate=3600",
+      },
     }
-
-    const raw = await res.text();
-    const channels = parseM3UToChannels(raw, 300);
-
-    return NextResponse.json(
-      { channels, fetchedAt: new Date().toISOString(), total: channels.length },
-      {
-        headers: {
-          "Cache-Control": "s-maxage=3600, stale-while-revalidate=300",
-        },
-      }
-    );
-  } catch (error) {
-    console.error("[/api/channels] Error fetching IPTV playlist:", error);
-    return NextResponse.json(
-      { error: "Failed to load channels", channels: [], fetchedAt: null },
-      { status: 502 }
-    );
-  }
+  );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { Moon, Sun, Trophy, Tv2, Zap } from "lucide-react";
+import { Menu, Moon, Sun, Trophy, Tv2, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -73,6 +73,7 @@ function ThemeToggle() {
 export default function Navbar() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -83,7 +84,7 @@ export default function Navbar() {
   return (
     <header
       className={`sticky top-0 z-50 w-full transition-all duration-300 ${
-        scrolled
+        scrolled || mobileMenuOpen
           ? "border-white/8 border-b bg-background/60 shadow-black/20 shadow-lg backdrop-blur-xl"
           : "border-transparent border-b bg-transparent backdrop-blur-md"
       }`}
@@ -106,7 +107,7 @@ export default function Navbar() {
             </span>
           </Link>
 
-          <nav className="hidden h-8 items-center gap-1.5 border-white/10 border-l pl-5 sm:flex">
+          <nav className="hidden h-8 items-center gap-1.5 border-white/10 border-l pl-5 md:flex">
             <Link
               href="/"
               className={`rounded-lg px-3 py-1.5 font-semibold text-xs tracking-wide transition-all ${
@@ -131,16 +132,10 @@ export default function Navbar() {
           </nav>
         </div>
 
-        {/* Center tagline */}
-        <div className="hidden items-center gap-2 text-muted-foreground text-sm md:flex">
-          <Zap className="h-4 w-4 text-primary" />
-          <span>Live Sports. Any Country. Any Sport.</span>
-        </div>
-
         {/* Right */}
         <div className="flex items-center gap-3">
           {/* Live badge */}
-          <div className="flex items-center gap-1.5 rounded-full border border-red-500/20 bg-red-500/10 px-3 py-1.5">
+          <div className="hidden items-center gap-1.5 rounded-full border border-red-500/20 bg-red-500/10 px-3 py-1.5 min-[360px]:flex">
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500" />
@@ -153,8 +148,49 @@ export default function Navbar() {
 
           {/* Theme toggle */}
           <ThemeToggle />
+
+          {/* Mobile menu button */}
+          <button
+            type="button"
+            className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-muted/20 text-foreground transition-all hover:bg-muted/30 md:hidden"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
         </div>
       </div>
+
+      {/* Mobile nav dropdown */}
+      {mobileMenuOpen && (
+        <div className="border-white/8 border-t bg-background/95 backdrop-blur-lg md:hidden">
+          <nav className="flex flex-col gap-2 px-4 py-4">
+            <Link
+              href="/"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`rounded-xl px-4 py-3 font-semibold text-sm transition-all ${
+                pathname === "/"
+                  ? "border border-primary/20 bg-primary/15 text-primary"
+                  : "text-muted-foreground hover:bg-muted/30 hover:text-foreground"
+              }`}
+            >
+              Live Channels
+            </Link>
+            <Link
+              href="/world-cup"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`flex items-center gap-2 rounded-xl px-4 py-3 font-semibold text-sm transition-all ${
+                pathname === "/world-cup"
+                  ? "border border-amber-500/25 bg-amber-500/15 text-amber-400"
+                  : "text-muted-foreground hover:bg-muted/30 hover:text-foreground"
+              }`}
+            >
+              <Trophy className="h-4 w-4 text-amber-400" />
+              World Cup 2026
+            </Link>
+          </nav>
+        </div>
+      )}
     </header>
   );
 }

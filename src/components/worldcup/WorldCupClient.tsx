@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import { Trophy, Search, Clock, RefreshCw, X } from "lucide-react";
+import { Trophy, Search, Clock, RefreshCw, X, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -24,6 +24,25 @@ interface WCMatch {
   attendance: string | null;
 }
 
+interface GroupTeam {
+  rank: number;
+  team: string;
+  code: string;
+  played: number;
+  won: number;
+  drawn: number;
+  lost: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDifference: number;
+  points: number;
+}
+
+interface Group {
+  name: string;
+  standings: GroupTeam[];
+}
+
 type TabValue = "all" | "group" | "knockout" | "finished" | "upcoming";
 
 // ── Flag helper ───────────────────────────────────────────────────────────────
@@ -40,12 +59,17 @@ const COUNTRY_ISO: Record<string, string> = {
   AUT: "at", TUN: "tn", PAN: "pa", UKR: "ua", PER: "pe", EGY: "eg",
   ROU: "ro", FIN: "fi", HUN: "hu", SVN: "si", SVK: "sk", GEO: "ge",
   ALB: "al", ALG: "dz", CIV2: "ci", COD: "cd", CPV: "cv", JOR: "jo",
-  UZB: "uz", CRO: "hr", VEN: "ve", BOL: "bo",
+  UZB: "uz", CRO: "hr", VEN: "ve", BOL: "bo", CUW: "cw",
 };
 
 function flagUrl(code: string): string {
   const iso = COUNTRY_ISO[code?.toUpperCase()] || code?.toLowerCase();
   return `https://flagcdn.com/w80/${iso}.png`;
+}
+
+function flagUrlMini(code: string): string {
+  const iso = COUNTRY_ISO[code?.toUpperCase()] || code?.toLowerCase();
+  return `https://flagcdn.com/w40/${iso}.png`;
 }
 
 // ── Date formatting ───────────────────────────────────────────────────────────
@@ -82,10 +106,6 @@ function FixtureCard({ match, index }: { match: WCMatch; index: number }) {
     <div
       className="card-enter fixture-card bg-white/[0.04] border border-white/[0.06] rounded-2xl overflow-hidden hover:border-[#e94560]/30 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#e94560]/5 transition-all duration-300"
       style={{ animationDelay: `${index * 30}ms` }}
-      data-type={isKnockout ? "knockout" : "group"}
-      data-finished={isFinished ? "true" : "false"}
-      data-home={match.homeTeam.toLowerCase()}
-      data-away={match.awayTeam.toLowerCase()}
     >
       {/* Card header */}
       <div className="bg-white/5 px-4 py-3 flex items-center justify-between border-b border-white/5 text-xs">
@@ -225,12 +245,14 @@ function FixtureSkeleton() {
 export default function WorldCupClient() {
   const [upcomingMatches, setUpcomingMatches] = useState<WCMatch[]>([]);
   const [recentResults, setRecentResults] = useState<WCMatch[]>([]);
+  const [standings, setStandings] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [activeTab, setActiveTab] = useState<TabValue>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [showStandings, setShowStandings] = useState(false);
 
   const fetchData = async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
@@ -242,6 +264,7 @@ export default function WorldCupClient() {
       const data = await res.json();
       setUpcomingMatches(data.upcomingMatches || []);
       setRecentResults(data.recentResults || []);
+      setStandings(data.standings || []);
     } catch {
       setError("Failed to fetch World Cup data. Please try again.");
     } finally {
@@ -256,7 +279,6 @@ export default function WorldCupClient() {
     return () => clearInterval(iv);
   }, []);
 
-  // All matches merged, newest finished first then upcoming
   const allMatches = useMemo(
     () => [...recentResults, ...upcomingMatches],
     [recentResults, upcomingMatches]
@@ -304,7 +326,6 @@ export default function WorldCupClient() {
     <main className="flex-1 max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* ── Hero Header ──────────────────────────────────────────────────────── */}
       <div className="relative bg-gradient-to-r from-yellow-600/20 to-[#e94560]/10 border border-white/[0.06] rounded-3xl p-6 sm:p-10 mb-8 overflow-hidden shadow-2xl">
-        {/* Radial glow */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(234,179,8,0.08)_0%,_transparent_60%)] pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -322,7 +343,6 @@ export default function WorldCupClient() {
             </p>
           </div>
 
-          {/* Search + refresh */}
           <div className="w-full md:w-auto flex flex-col sm:flex-row gap-3">
             <div className="relative w-full sm:w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
@@ -358,6 +378,81 @@ export default function WorldCupClient() {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* ── Standings Collapsible Panel on WC Page ──────────────────────────── */}
+      <div className="mb-8">
+        <button
+          onClick={() => setShowStandings((v) => !v)}
+          className={cn(
+            "flex items-center gap-2 px-5 py-3 rounded-2xl text-sm font-semibold transition-all border w-full justify-between shadow-md",
+            showStandings
+              ? "bg-yellow-500/20 text-yellow-400 border-yellow-500/30"
+              : "bg-yellow-500/10 text-yellow-500 border-yellow-500/20 hover:bg-yellow-500/20"
+          )}
+        >
+          <span className="flex items-center gap-2">
+            <Trophy className="w-4 h-4" />
+            FIFA World Cup 2026 — Group Stage Standings
+          </span>
+          <ChevronDown className={cn("w-4 h-4 transition-transform", showStandings && "rotate-180")} />
+        </button>
+
+        {showStandings && (
+          <div className="mt-4 p-5 bg-white/[0.02] border border-white/[0.05] rounded-3xl animate-fade-in">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {standings.map((group) => (
+                <div
+                  key={group.name}
+                  className="bg-white/[0.04] border border-white/[0.06] rounded-xl overflow-hidden hover:border-yellow-500/30 transition-all"
+                >
+                  <div className="bg-white/5 px-4 py-3 flex items-center gap-3">
+                    <div className="w-7 h-7 bg-yellow-500/20 rounded-lg flex items-center justify-center">
+                      <span className="text-yellow-500 font-bold text-xs">
+                        {group.name.replace("Group ", "")}
+                      </span>
+                    </div>
+                    <span className="font-semibold text-sm">{group.name}</span>
+                  </div>
+
+                  <div className="p-3">
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="text-gray-500 border-b border-white/5">
+                          <th className="text-left pb-1.5 w-5">#</th>
+                          <th className="text-left pb-1.5">Team</th>
+                          <th className="text-center pb-1.5">P</th>
+                          <th className="text-center pb-1.5 font-bold">PTS</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {group.standings.map((t) => (
+                          <tr key={t.team} className="border-b border-white/5 last:border-0">
+                            <td className="py-1.5 text-gray-500">{t.rank}</td>
+                            <td className="py-1.5">
+                              <div className="flex items-center gap-1.5">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                  src={flagUrlMini(t.code)}
+                                  alt={t.team}
+                                  className="w-4 h-3 object-cover rounded-sm"
+                                  onError={(e) => ((e.target as HTMLImageElement).style.display = "none")}
+                                />
+                                <span className="font-medium truncate max-w-[85px]">{t.team}</span>
+                              </div>
+                            </td>
+                            <td className="py-1.5 text-center text-gray-400">{t.played}</td>
+                            <td className="py-1.5 text-center font-bold text-white">{t.points}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── Filter Tabs ───────────────────────────────────────────────────────── */}

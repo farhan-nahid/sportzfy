@@ -181,8 +181,7 @@ export async function GET() {
     // Sort recent finished results, newest first
     const recentResults = allFormattedMatches
       .filter((m: any) => m.status === "FINISHED")
-      .sort((a: any, b: any) => b.date.localeCompare(a.date) || b.time.localeCompare(a.time))
-      .slice(0, 12);
+      .sort((a: any, b: any) => b.date.localeCompare(a.date) || b.time.localeCompare(a.time));
 
     // Sort upcoming scheduled fixtures, oldest first
     const upcomingMatches = allFormattedMatches

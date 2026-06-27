@@ -38,12 +38,15 @@ export const EZ_CHANNELS: EzChannel[] = [
     quality: "FHD",
     nowPlaying: "Live Match",
     servers: [
+      { name: "WC 2026", url: "https://tahmidx.cinemoja.workers.dev/", type: "hls" },
+      { name: "BEIN 1", url: "https://cp11.adabmedia.com/hls2/sport.m3u8", type: "hls" },
+      { name: "TOFFEE", url: "https://toffee-proxy.shahriar-diu64.workers.dev/https://prod-cdn01-live.toffeelive.com/live/FIFA-2026-4/0/master_2000.m3u8", type: "hls" },
       { name: "TOFFEE 2", url: "https://tv.ezshomadhan.com/toffee-player", type: "iframe" },
-      { name: "WC 2026",  url: "https://tahmidx.cinemoja.workers.dev/",     type: "hls"   },
-      { name: "TOFFEE",   url: "https://toffee-proxy.shahriar-diu64.workers.dev/https://prod-cdn01-live.toffeelive.com/live/FIFA-2026-4/0/master_2000.m3u8", type: "hls" },
-      { name: "BEIN",     url: "https://cp11.adabmedia.com/hls2/sport.m3u8", type: "hls"  },
-      { name: "ESPN",     url: "https://1nyaler.streamhostingcdn.top/stream/97/index.m3u8", type: "hls" },
-      { name: "CBS",      url: "https://tx3.nexgen.bz:4000/CBS_SPORTS/index.m3u8", type: "hls" },
+      { name: "BEIN 2 (Adab)", url: "https://live.adabmedia.com/hls/bein1.m3u8", type: "hls" },
+      { name: "ESPN", url: "https://1nyaler.streamhostingcdn.top/stream/97/index.m3u8", type: "hls" },
+      { name: "CBS", url: "https://tx3.nexgen.bz:4000/CBS_SPORTS/index.m3u8", type: "hls" },
+      { name: "TSports (Live)", url: "https://103.59.176.72:8083/live1/tracks-v1a1/mono.m3u8?token=123", type: "hls" },
+      { name: "Adab Live", url: "https://live.adabmedia.com/hls/sport.m3u8", type: "hls" },
     ],
   },
   {
@@ -54,7 +57,7 @@ export const EZ_CHANNELS: EzChannel[] = [
     quality: "HD",
     nowPlaying: "Sports News",
     servers: [
-      { name: "Server 1", url: "https://bdix.my.id/onair/e.php?channel=tsports",  type: "iframe" },
+      { name: "Server 1", url: "https://bdix.my.id/onair/e.php?channel=tsports", type: "iframe" },
       { name: "Server 2", url: "https://bdix.my.id/onair/e.php?channel=tsports2", type: "iframe" },
       { name: "Server 3", url: "https://103.59.176.72:8083/live1/tracks-v1a1/mono.m3u8?token=123", type: "hls" },
     ],
@@ -81,8 +84,8 @@ export const EZ_CHANNELS: EzChannel[] = [
     quality: "HD",
     nowPlaying: "News Hour",
     servers: [
-      { name: "Somoy TV", url: "https://live.thebosstv.com:30443/dwlive/Somoy-TV/chunks.m3u8", type: "hls"   },
-      { name: "Server 1", url: "https://bdix.my.id/onair/e.php?channel=somoy",               type: "iframe" },
+      { name: "Somoy TV", url: "https://live.thebosstv.com:30443/dwlive/Somoy-TV/chunks.m3u8", type: "hls" },
+      { name: "Server 1", url: "https://bdix.my.id/onair/e.php?channel=somoy", type: "iframe" },
     ],
   },
   {
@@ -281,10 +284,10 @@ export const EZ_CHANNELS: EzChannel[] = [
 ];
 
 export const CATEGORIES: { label: string; value: ChannelCategory | "all"; icon: string }[] = [
-  { label: "All",            value: "all",            icon: "📺" },
-  { label: "Sports",         value: "sports",         icon: "🏆" },
-  { label: "News",           value: "news",           icon: "📰" },
-  { label: "Entertainment",  value: "entertainment",  icon: "🎬" },
-  { label: "Music",          value: "music",          icon: "🎵" },
-  { label: "International",  value: "international",  icon: "🌍" },
+  { label: "All", value: "all", icon: "📺" },
+  { label: "Sports", value: "sports", icon: "🏆" },
+  { label: "News", value: "news", icon: "📰" },
+  { label: "Entertainment", value: "entertainment", icon: "🎬" },
+  { label: "Music", value: "music", icon: "🎵" },
+  { label: "International", value: "international", icon: "🌍" },
 ];

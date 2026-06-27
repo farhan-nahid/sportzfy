@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef, useCallback } from "react";
-import { Search, X, Play, Tv, Trophy, ChevronDown, RefreshCw, Server } from "lucide-react";
-import { cn } from "@/lib/utils";
-import type { EzChannel, StreamServer, ChannelCategory } from "@/data/ezchannels";
+import type { ChannelCategory, EzChannel } from "@/data/ezchannels";
 import { CATEGORIES } from "@/data/ezchannels";
+import { cn } from "@/lib/utils";
+import { Play, RefreshCw, Search, Server, Tv, X } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -27,15 +27,19 @@ interface Group {
   standings: GroupTeam[];
 }
 
-// ── Flag helper ────────────────────────────────────────────────────────────────
-
 const COUNTRY_CODE: Record<string, string> = {
   MEX: "mx", RSA: "za", KOR: "kr", CZE: "cz", SUI: "ch", CAN: "ca",
   BIH: "ba", QAT: "qa", BRA: "br", MAR: "ma", SCO: "gb-sct", HAI: "ht",
   USA: "us", AUS: "au", PAR: "py", TUR: "tr", GER: "de", CIV: "ci",
   ECU: "ec", POR: "pt", ARG: "ar", FRA: "fr", ENG: "gb-eng", ESP: "es",
   ITA: "it", NED: "nl", BEL: "be", URU: "uy", JPN: "jp", COL: "co",
-  SEN: "sn", DEN: "dk", POL: "pl", IRN: "ir",
+  SEN: "sn", DEN: "dk", POL: "pl", IRN: "ir", SWE: "se", NZL: "nz",
+  GHA: "gh", HON: "hn", CHI: "cl", GBR: "gb", OMA: "om", CMR: "cm",
+  CRC: "cr", NGA: "ng", CHN: "cn", IRQ: "iq", NOR: "no", KSA: "sa",
+  AUT: "at", TUN: "tn", PAN: "pa", UKR: "ua", PER: "pe", EGY: "eg",
+  ROU: "ro", FIN: "fi", HUN: "hu", SVN: "si", SVK: "sk", GEO: "ge",
+  ALB: "al", ALG: "dz", CIV2: "ci", COD: "cd", CPV: "cv", JOR: "jo",
+  UZB: "uz", CRO: "hr", VEN: "ve", BOL: "bo", CUW: "cw",
 };
 
 function flagUrl(code: string): string {
@@ -269,116 +273,6 @@ function InlinePlayer({
   );
 }
 
-// ── WC Standings mini panel ───────────────────────────────────────────────────
-
-function WCStandingsPanel({ onClose }: { onClose: () => void }) {
-  const [groups, setGroups] = useState<Group[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch("/api/worldcup")
-      .then((r) => r.json())
-      .then((d) => setGroups(d.standings || []))
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
-
-  return (
-    <div className="mb-6 animate-fade-in">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-yellow-500/10 rounded-xl flex items-center justify-center">
-            <Trophy className="w-5 h-5 text-yellow-500" />
-          </div>
-          <div>
-            <h2 className="text-base font-bold">FIFA World Cup 2026</h2>
-            <p className="text-gray-500 text-xs">Group Stage Standings</p>
-          </div>
-        </div>
-        <button
-          onClick={onClose}
-          className="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors text-gray-400 hover:text-white"
-        >
-          <X className="w-4 h-4" />
-        </button>
-      </div>
-
-      {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="h-40 rounded-xl bg-white/5 animate-pulse" />
-          ))}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {groups.map((group) => (
-            <div
-              key={group.name}
-              className="bg-white/[0.04] border border-white/[0.06] rounded-xl overflow-hidden hover:border-yellow-500/30 transition-all"
-            >
-              {/* Group header */}
-              <div className="bg-white/5 px-4 py-3 flex items-center gap-3">
-                <div className="w-7 h-7 bg-yellow-500/20 rounded-lg flex items-center justify-center">
-                  <span className="text-yellow-500 font-bold text-xs">
-                    {group.name.replace("Group ", "")}
-                  </span>
-                </div>
-                <span className="font-semibold text-sm">{group.name}</span>
-              </div>
-
-              {/* Standings table */}
-              <div className="p-3">
-                <table className="w-full text-xs">
-                  <thead>
-                    <tr className="text-gray-500 border-b border-white/5">
-                      <th className="text-left pb-1.5 w-5">#</th>
-                      <th className="text-left pb-1.5">Team</th>
-                      <th className="text-center pb-1.5">P</th>
-                      <th className="text-center pb-1.5">W</th>
-                      <th className="text-center pb-1.5">D</th>
-                      <th className="text-center pb-1.5">L</th>
-                      <th className="text-center pb-1.5">GD</th>
-                      <th className="text-center pb-1.5 font-bold">PTS</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {group.standings.map((t) => (
-                      <tr key={t.team} className="border-b border-white/5 last:border-0">
-                        <td className="py-1.5 text-gray-500">{t.rank}</td>
-                        <td className="py-1.5">
-                          <div className="flex items-center gap-1.5">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={flagUrl(t.code)}
-                              alt={t.team}
-                              className="w-4 h-3 object-cover rounded-sm"
-                              onError={(e) => ((e.target as HTMLImageElement).style.display = "none")}
-                            />
-                            <span className="font-medium truncate max-w-[70px]">{t.team}</span>
-                          </div>
-                        </td>
-                        <td className="py-1.5 text-center text-gray-400">{t.played}</td>
-                        <td className="py-1.5 text-center text-gray-400">{t.won}</td>
-                        <td className="py-1.5 text-center text-gray-400">{t.drawn}</td>
-                        <td className="py-1.5 text-center text-gray-400">{t.lost}</td>
-                        <td className={cn("py-1.5 text-center", t.goalDifference > 0 ? "text-green-500" : t.goalDifference < 0 ? "text-red-500" : "text-gray-400")}>
-                          {t.goalDifference > 0 ? `+${t.goalDifference}` : t.goalDifference}
-                        </td>
-                        <td className="py-1.5 text-center font-bold text-white">{t.points}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
 // ── Skeleton ──────────────────────────────────────────────────────────────────
 
 function ChannelSkeleton() {
@@ -414,8 +308,6 @@ export default function HomeClient({ initialChannels }: HomeClientProps) {
 
   const [activeChannel, setActiveChannel] = useState<EzChannel | null>(null);
   const [serverIdx, setServerIdx] = useState(0);
-
-  const [showStandings, setShowStandings] = useState(false);
 
   const playerRef = useRef<HTMLDivElement>(null);
 
@@ -457,7 +349,6 @@ export default function HomeClient({ initialChannels }: HomeClientProps) {
   const handlePlay = (ch: EzChannel) => {
     setActiveChannel(ch);
     setServerIdx(0);
-    setShowStandings(false);
     // Scroll to player
     setTimeout(() => playerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
   };
@@ -475,36 +366,6 @@ export default function HomeClient({ initialChannels }: HomeClientProps) {
 
   return (
     <main className="flex-1 max-w-screen-xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6">
-      {/* ── World Cup Toggle Button ─────────────────────────────────────────── */}
-      <div className="flex items-center gap-2 mb-6 flex-wrap">
-        <button
-          id="wc-standings-btn"
-          onClick={() => setShowStandings((v) => !v)}
-          className={cn(
-            "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all border whitespace-nowrap",
-            showStandings
-              ? "bg-yellow-500/20 text-yellow-400 border-yellow-500/30"
-              : "bg-yellow-500/10 text-yellow-500 border-yellow-500/20 hover:bg-yellow-500/20"
-          )}
-        >
-          <Trophy className="w-4 h-4" />
-          FIFA World Cup 2026 — Group Standings
-          <ChevronDown className={cn("w-3.5 h-3.5 transition-transform", showStandings && "rotate-180")} />
-        </button>
-
-        <a
-          href="/world-cup"
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all border border-white/8 bg-white/5 text-gray-400 hover:text-white hover:bg-white/8 whitespace-nowrap"
-        >
-          <Tv className="w-4 h-4" />
-          WC Fixtures & Results
-        </a>
-      </div>
-
-      {/* ── World Cup Standings Panel ───────────────────────────────────────── */}
-      {showStandings && (
-        <WCStandingsPanel onClose={() => setShowStandings(false)} />
-      )}
 
       {/* ── Inline Player ──────────────────────────────────────────────────── */}
       <div ref={playerRef}>

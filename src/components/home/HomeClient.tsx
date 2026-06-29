@@ -292,14 +292,36 @@ function InlinePlayer({
       <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
         <div className="absolute inset-0">
           {server.type === "iframe" ? (
-            <iframe
-              src={server.url}
-              title="Live Channel Stream"
-              className="h-full w-full"
-              allowFullScreen
-              allow="autoplay; fullscreen"
-              style={{ border: "none" }}
-            />
+            server.url.includes("ezshomadhan.com") ? (
+              <div className="flex h-full w-full flex-col items-center justify-center bg-black/80 px-6 text-center">
+                <Tv className="mb-3 h-12 w-12 animate-pulse text-[#e94560]" />
+                <h3 className="mb-1 font-semibold text-base text-white">
+                  Direct Access Stream
+                </h3>
+                <p className="mb-4 max-w-sm text-gray-400 text-xs leading-relaxed">
+                  Toffee requires direct browser authentication and cannot be embedded.
+                  Click below to launch the live stream in a new tab.
+                </p>
+                <a
+                  href={server.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#e94560] to-[#ff6b8b] px-5 py-2.5 font-bold text-sm text-white shadow-[#e94560]/30 shadow-lg transition-all hover:scale-105 hover:shadow-[#e94560]/40 hover:shadow-xl"
+                >
+                  <span>Launch Stream</span>
+                  <span className="text-xs">↗</span>
+                </a>
+              </div>
+            ) : (
+              <iframe
+                src={server.url}
+                title="Live Channel Stream"
+                className="h-full w-full"
+                allowFullScreen
+                allow="autoplay; fullscreen"
+                style={{ border: "none" }}
+              />
+            )
           ) : (
             <video
               ref={videoRef}
@@ -312,6 +334,23 @@ function InlinePlayer({
         </div>
       </div>
 
+      {server.type === "iframe" && (
+        <div className="flex items-center justify-between gap-4 border-white/8 border-t bg-white/5 px-4 py-3">
+          <p className="text-gray-400 text-xs">
+            This server uses an external frame. If the player remains blank, open it
+            directly in a new tab:
+          </p>
+          <a
+            href={server.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 rounded-lg bg-white/10 px-3 py-1.5 font-semibold text-white text-xs transition-colors hover:bg-white/20"
+          >
+            Open Stream ↗
+          </a>
+        </div>
+      )}
+
       {/* Server switcher */}
       {channel.servers.length > 1 && (
         <div className="border-white/8 border-t bg-white/5 px-4 py-3">
@@ -322,7 +361,7 @@ function InlinePlayer({
             {channel.servers.map((srv, i) => (
               <button
                 type="button"
-                key={`${srv.name}-${srv.url}`}
+                key={`${srv.name}-${srv.url}-${i}`}
                 onClick={() => onServerChange(i)}
                 className={cn(
                   "whitespace-nowrap rounded-lg border px-3 py-1.5 font-medium text-xs transition-all",

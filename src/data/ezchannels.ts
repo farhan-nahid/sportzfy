@@ -38,30 +38,20 @@ export const EZ_CHANNELS: EzChannel[] = [
     quality: "FHD",
     nowPlaying: "Live Match",
     servers: [
-      {
-        name: "T Sports HD",
-        url: "https://tvsen7.aynaott.com/tsports-hd/index.m3u8",
-        type: "hls",
-      },
       { name: "BEIN 1", url: "https://cp11.adabmedia.com/hls2/sport.m3u8", type: "hls" },
-      {
-        name: "TOFFEE 2",
-        url: "https://tv.ezshomadhan.com/toffee-player",
-        type: "iframe",
-      },
       {
         name: "BEIN 2 (Adab)",
         url: "https://live.adabmedia.com/hls/bein1.m3u8",
         type: "hls",
       },
       {
-        name: "ESPN",
-        url: "https://1nyaler.streamhostingcdn.top/stream/97/index.m3u8",
+        name: "Adab Live",
+        url: "https://live.adabmedia.com/hls/sport.m3u8",
         type: "hls",
       },
       {
-        name: "CBS",
-        url: "https://tx3.nexgen.bz:4000/CBS_SPORTS/index.m3u8",
+        name: "T Sports HD",
+        url: "https://tvsen7.aynaott.com/tsports-hd/index.m3u8",
         type: "hls",
       },
       {
@@ -70,8 +60,13 @@ export const EZ_CHANNELS: EzChannel[] = [
         type: "hls",
       },
       {
-        name: "Adab Live",
-        url: "https://live.adabmedia.com/hls/sport.m3u8",
+        name: "TOFFEE 2",
+        url: "https://tv.ezshomadhan.com/toffee-player",
+        type: "iframe",
+      },
+      {
+        name: "ESPN",
+        url: "https://1nyaler.streamhostingcdn.top/stream/97/index.m3u8",
         type: "hls",
       },
     ],
@@ -137,13 +132,13 @@ export const EZ_CHANNELS: EzChannel[] = [
     nowPlaying: "News Hour",
     servers: [
       {
-        name: "Server 1 (HLS)",
-        url: "https://bozztv.com/rongo/rongo-somoy/index.m3u8",
+        name: "Somoy TV",
+        url: "https://live.thebosstv.com:30443/dwlive/Somoy-TV/chunks.m3u8",
         type: "hls",
       },
       {
-        name: "Somoy TV",
-        url: "https://live.thebosstv.com:30443/dwlive/Somoy-TV/chunks.m3u8",
+        name: "Server 1 (HLS)",
+        url: "https://bozztv.com/rongo/rongo-somoy/index.m3u8",
         type: "hls",
       },
       {

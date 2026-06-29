@@ -1,34 +1,10 @@
 import HeroSection from "@/components/home/HeroSection";
 import HomeClient from "@/components/home/HomeClient";
 import Navbar from "@/components/layout/Navbar";
-import type { EzChannel } from "@/data/ezchannels";
-
-/**
- * Fetch curated channels server-side for fast initial render.
- * Falls back to empty array if the API is unavailable.
- */
-async function getChannels(): Promise<EzChannel[]> {
-  try {
-    const baseUrl =
-      process.env.NEXT_PUBLIC_APP_URL ??
-      (process.env.VERCEL_URL
-        ? `https://${process.env.VERCEL_URL}`
-        : "http://localhost:3000");
-
-    const res = await fetch(`${baseUrl}/api/channels`, {
-      next: { revalidate: 86400 },
-    });
-
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.channels ?? [];
-  } catch {
-    return [];
-  }
-}
+import { EZ_CHANNELS } from "@/data/ezchannels";
 
 export default async function HomePage() {
-  const channels = await getChannels();
+  const channels = EZ_CHANNELS;
 
   return (
     <div className="flex min-h-screen flex-col">

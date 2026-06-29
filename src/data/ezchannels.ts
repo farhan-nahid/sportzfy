@@ -38,13 +38,12 @@ export const EZ_CHANNELS: EzChannel[] = [
     quality: "FHD",
     nowPlaying: "Live Match",
     servers: [
-      { name: "WC 2026", url: "https://tahmidx.cinemoja.workers.dev/", type: "hls" },
-      { name: "BEIN 1", url: "https://cp11.adabmedia.com/hls2/sport.m3u8", type: "hls" },
       {
-        name: "TOFFEE",
-        url: "https://toffee-proxy.shahriar-diu64.workers.dev/https://prod-cdn01-live.toffeelive.com/live/FIFA-2026-4/0/master_2000.m3u8",
+        name: "T Sports HD",
+        url: "https://tvsen7.aynaott.com/tsports-hd/index.m3u8",
         type: "hls",
       },
+      { name: "BEIN 1", url: "https://cp11.adabmedia.com/hls2/sport.m3u8", type: "hls" },
       {
         name: "TOFFEE 2",
         url: "https://tv.ezshomadhan.com/toffee-player",
@@ -86,17 +85,22 @@ export const EZ_CHANNELS: EzChannel[] = [
     nowPlaying: "Sports News",
     servers: [
       {
-        name: "Server 1",
+        name: "Server 1 (HD HLS)",
+        url: "https://tvsen7.aynaott.com/tsports-hd/index.m3u8",
+        type: "hls",
+      },
+      {
+        name: "Server 2 (Iframe)",
         url: "https://bdix.my.id/onair/e.php?channel=tsports",
         type: "iframe",
       },
       {
-        name: "Server 2",
+        name: "Server 3 (Iframe)",
         url: "https://bdix.my.id/onair/e.php?channel=tsports2",
         type: "iframe",
       },
       {
-        name: "Server 3",
+        name: "Server 4 (HLS)",
         url: "https://103.59.176.72:8083/live1/tracks-v1a1/mono.m3u8?token=123",
         type: "hls",
       },
@@ -133,12 +137,17 @@ export const EZ_CHANNELS: EzChannel[] = [
     nowPlaying: "News Hour",
     servers: [
       {
+        name: "Server 1 (HLS)",
+        url: "https://bozztv.com/rongo/rongo-somoy/index.m3u8",
+        type: "hls",
+      },
+      {
         name: "Somoy TV",
         url: "https://live.thebosstv.com:30443/dwlive/Somoy-TV/chunks.m3u8",
         type: "hls",
       },
       {
-        name: "Server 1",
+        name: "Server 2 (Iframe)",
         url: "https://bdix.my.id/onair/e.php?channel=somoy",
         type: "iframe",
       },
@@ -183,7 +192,12 @@ export const EZ_CHANNELS: EzChannel[] = [
     nowPlaying: "News",
     servers: [
       {
-        name: "Server 1",
+        name: "Server 1 (HLS)",
+        url: "https://bozztv.com/rongo/rongo-JamunaTelevision/index.m3u8",
+        type: "hls",
+      },
+      {
+        name: "Server 2",
         url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1701/output/index.m3u8",
         type: "hls",
       },
@@ -198,7 +212,12 @@ export const EZ_CHANNELS: EzChannel[] = [
     nowPlaying: "News",
     servers: [
       {
-        name: "Server 1",
+        name: "Server 1 (HLS)",
+        url: "https://bozztv.com/rongo/rongo-SangsadTV/index.m3u8",
+        type: "hls",
+      },
+      {
+        name: "Server 2",
         url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1709/output/index.m3u8",
         type: "hls",
       },
@@ -213,7 +232,12 @@ export const EZ_CHANNELS: EzChannel[] = [
     nowPlaying: "News",
     servers: [
       {
-        name: "Server 1",
+        name: "Server 1 (HLS)",
+        url: "https://bozztv.com/rongo/rongo-Channel24HD/index.m3u8",
+        type: "hls",
+      },
+      {
+        name: "Server 2",
         url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1703/output/index.m3u8",
         type: "hls",
       },
@@ -228,7 +252,12 @@ export const EZ_CHANNELS: EzChannel[] = [
     nowPlaying: "News",
     servers: [
       {
-        name: "Server 1",
+        name: "Server 1 (HLS)",
+        url: "https://bozztv.com/rongo/rongo-News24HD/index.m3u8",
+        type: "hls",
+      },
+      {
+        name: "Server 2",
         url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1708/output/index.m3u8",
         type: "hls",
       },
@@ -259,6 +288,11 @@ export const EZ_CHANNELS: EzChannel[] = [
     servers: [
       {
         name: "Server 1",
+        url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1705/output/1705.m3u8",
+        type: "hls",
+      },
+      {
+        name: "Server 2",
         url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1705/output/index.m3u8",
         type: "hls",
       },
@@ -275,7 +309,12 @@ export const EZ_CHANNELS: EzChannel[] = [
     nowPlaying: "Drama",
     servers: [
       {
-        name: "Server 1",
+        name: "Server 1 (HD HLS)",
+        url: "https://tvsen4.aynaott.com/n64PH4YL/index.m3u8",
+        type: "hls",
+      },
+      {
+        name: "Server 2",
         url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1800/output/index.m3u8",
         type: "hls",
       },

@@ -2,9 +2,9 @@
 
 import { Play, RefreshCw, Search, Server, Tv, X } from "lucide-react";
 import Image from "next/image";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ChannelCategory, EzChannel } from "@/data/ezchannels";
-import { CATEGORIES } from "@/data/ezchannels";
+import { CATEGORIES, EZ_CHANNELS } from "@/data/ezchannels";
 import { cn } from "@/lib/utils";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -368,8 +368,8 @@ interface HomeClientProps {
 }
 
 export default function HomeClient({ initialChannels }: HomeClientProps) {
-  const [channels, setChannels] = useState<EzChannel[]>(initialChannels);
-  const [loading, setLoading] = useState(initialChannels.length === 0);
+  const [channels, setChannels] = useState<EzChannel[]>(initialChannels || EZ_CHANNELS);
+  const [loading, setLoading] = useState(false);
 
   const [activeCategory, setActiveCategory] = useState<ChannelCategory | "all">("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -378,26 +378,6 @@ export default function HomeClient({ initialChannels }: HomeClientProps) {
   const [serverIdx, setServerIdx] = useState(0);
 
   const playerRef = useRef<HTMLDivElement>(null);
-
-  // Fetch channels if SSR returned empty
-  const fetchChannels = useCallback(async () => {
-    try {
-      const res = await fetch("/api/channels");
-      if (!res.ok) return;
-      const data = await res.json();
-      setChannels(data.channels ?? []);
-    } catch (err) {
-      console.error("Failed to fetch channels:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (initialChannels.length === 0) {
-      void fetchChannels();
-    }
-  }, [fetchChannels, initialChannels.length]);
 
   // Filtered channels
   const filtered = useMemo(() => {

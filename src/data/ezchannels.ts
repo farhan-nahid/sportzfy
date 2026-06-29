@@ -116,16 +116,6 @@ export const EZ_CHANNELS: EzChannel[] = [
     nowPlaying: "Sports News",
     servers: [
       {
-        name: "TOFFEE 2",
-        url: "https://tv.ezshomadhan.com/toffee-player",
-        type: "iframe",
-      },
-      {
-        name: "Server 1 (HD HLS)",
-        url: "https://tvsen7.aynaott.com/tsports-hd/index.m3u8",
-        type: "hls",
-      },
-      {
         name: "Server 2 (Iframe)",
         url: "https://bdix.my.id/onair/e.php?channel=tsports",
         type: "iframe",
@@ -135,12 +125,22 @@ export const EZ_CHANNELS: EzChannel[] = [
         url: "https://bdix.my.id/onair/e.php?channel=tsports2",
         type: "iframe",
       },
+      {
+        name: "TOFFEE 2",
+        url: "https://tv.ezshomadhan.com/toffee-player",
+        type: "iframe",
+      },
+      {
+        name: "Server 1 (HD HLS)",
+        url: "https://tvsen7.aynaott.com/tsports-hd/index.m3u8",
+        type: "hls",
+      },
     ],
   },
   {
     id: "20",
     name: "FIFA TV",
-    logo: "https://cdn.plus.fifa.com/images/web/logoFIFA.png",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/FIFA_logo_without_slogan.svg/512px-FIFA_logo_without_slogan.svg.png",
     category: "sports",
     quality: "HD",
     nowPlaying: "Sports",
@@ -217,16 +217,11 @@ export const EZ_CHANNELS: EzChannel[] = [
   {
     id: "13",
     name: "Jamuna TV",
-    logo: "https://itcnbd.live/images/36f380e0-6c71-4b27-a73b-2afb3ce7e982.webp",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Jamuna_TV_logo.svg/512px-Jamuna_TV_logo.svg.png",
     category: "news",
     quality: "HD",
     nowPlaying: "News",
     servers: [
-      {
-        name: "Server 1 (HLS)",
-        url: "https://bozztv.com/rongo/rongo-JamunaTelevision/index.m3u8",
-        type: "hls",
-      },
       {
         name: "Server 2",
         url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1701/output/index.m3u8",
@@ -243,11 +238,6 @@ export const EZ_CHANNELS: EzChannel[] = [
     nowPlaying: "News",
     servers: [
       {
-        name: "Server 1 (HLS)",
-        url: "https://bozztv.com/rongo/rongo-SangsadTV/index.m3u8",
-        type: "hls",
-      },
-      {
         name: "Server 2",
         url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1709/output/index.m3u8",
         type: "hls",
@@ -263,11 +253,6 @@ export const EZ_CHANNELS: EzChannel[] = [
     nowPlaying: "News",
     servers: [
       {
-        name: "Server 1 (HLS)",
-        url: "https://bozztv.com/rongo/rongo-Channel24HD/index.m3u8",
-        type: "hls",
-      },
-      {
         name: "Server 2",
         url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1703/output/index.m3u8",
         type: "hls",
@@ -282,11 +267,6 @@ export const EZ_CHANNELS: EzChannel[] = [
     quality: "HD",
     nowPlaying: "News",
     servers: [
-      {
-        name: "Server 1 (HLS)",
-        url: "https://bozztv.com/rongo/rongo-News24HD/index.m3u8",
-        type: "hls",
-      },
       {
         name: "Server 2",
         url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1708/output/index.m3u8",
@@ -329,137 +309,70 @@ export const EZ_CHANNELS: EzChannel[] = [
       },
     ],
   },
+  {
+    id: "23",
+    name: "DBC News",
+    logo: "https://i.ibb.co.com/NX6gsgJ/dbc-news.jpg",
+    category: "news",
+    quality: "HD",
+    nowPlaying: "News",
+    servers: [
+      {
+        name: "Server 1",
+        url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1728/output/index.m3u8",
+        type: "hls",
+      },
+    ],
+  },
 
   // ─── ENTERTAINMENT ────────────────────────────────────────────────────────────
   {
-    id: "7",
-    name: "Star Jalsha",
-    logo: "https://akashgo-mediaready.videoready.tv/akashgo/image/fetch/f_auto,fl_lossy,q_auto,w_180,h_180/https://tstatic.akash-go.com/cms-ui/images/custom-content/1735562033891.png",
+    id: "17",
+    name: "Deepto Tv",
+    logo: "https://upload.wikimedia.org/wikipedia/en/thumb/0/00/Logo_of_Deepto_TV.svg/330px-Logo_of_Deepto_TV.svg.png",
     category: "entertainment",
     quality: "HD",
-    nowPlaying: "Drama",
+    nowPlaying: "Entertainment",
     servers: [
       {
-        name: "Server 1 (HD HLS)",
-        url: "https://tvsen4.aynaott.com/n64PH4YL/index.m3u8",
-        type: "hls",
-      },
-      {
-        name: "Server 2",
-        url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1800/output/index.m3u8",
+        name: "Server 1",
+        url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1711/output/index.m3u8",
         type: "hls",
       },
     ],
   },
   {
-    id: "8",
-    name: "Star Plus",
-    logo: "https://akashgo-mediaready.videoready.tv/akashgo/image/fetch/f_auto,fl_lossy,q_auto,w_180,h_180/https://tstatic.akash-go.com/cms-ui/images/custom-content/1735561987165.png",
+    id: "21-drama",
+    name: "G-Series",
+    logo: "https://i.ibb.co.com/35G4dT0k/G-Series.png",
     category: "entertainment",
     quality: "HD",
-    nowPlaying: "Drama",
+    nowPlaying: "Entertainment",
     servers: [
       {
         name: "Server 1",
-        url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1801/output/index.m3u8",
+        url: "https://vods2.aynaott.com/gseriesDrama/tracks-v1a1/mono.ts.m3u8",
         type: "hls",
       },
     ],
   },
   {
-    id: "9",
-    name: "Sony LIV",
-    logo: "https://akashgo-mediaready.videoready.tv/akashgo/image/fetch/f_auto,fl_lossy,q_auto,w_180,h_180/https://tstatic.akash-go.com/cms-ui/images/custom-content/1735562086234.png",
+    id: "22-ent",
+    name: "Discovery HD",
+    logo: "https://i.ibb.co.com/1GyTG78k/Discovery-HD.webp",
     category: "entertainment",
     quality: "HD",
-    nowPlaying: "Show",
+    nowPlaying: "Entertainment",
     servers: [
       {
         name: "Server 1",
-        url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1802/output/index.m3u8",
-        type: "hls",
-      },
-    ],
-  },
-  {
-    id: "10",
-    name: "Colors",
-    logo: "https://akashgo-mediaready.videoready.tv/akashgo/image/fetch/f_auto,fl_lossy,q_auto,w_180,h_180/https://tstatic.akash-go.com/cms-ui/images/custom-content/1735562140282.png",
-    category: "entertainment",
-    quality: "HD",
-    nowPlaying: "Reality Show",
-    servers: [
-      {
-        name: "Server 1",
-        url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1803/output/index.m3u8",
-        type: "hls",
-      },
-    ],
-  },
-
-  // ─── MUSIC ────────────────────────────────────────────────────────────────────
-  {
-    id: "21",
-    name: "MTV Beats",
-    logo: "https://akashgo-mediaready.videoready.tv/akashgo/image/fetch/f_auto,fl_lossy,q_auto,w_180,h_180/https://tstatic.akash-go.com/cms-ui/images/custom-content/1735562375469.png",
-    category: "music",
-    quality: "HD",
-    nowPlaying: "Music",
-    servers: [
-      {
-        name: "Server 1",
-        url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1900/output/index.m3u8",
-        type: "hls",
-      },
-    ],
-  },
-  {
-    id: "22",
-    name: "Channel V",
-    logo: "https://akashgo-mediaready.videoready.tv/akashgo/image/fetch/f_auto,fl_lossy,q_auto,w_180,h_180/https://tstatic.akash-go.com/cms-ui/images/custom-content/1735562419612.png",
-    category: "music",
-    quality: "HD",
-    nowPlaying: "Music",
-    servers: [
-      {
-        name: "Server 1",
-        url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1901/output/index.m3u8",
+        url: "https://ottbanglaplatform.com/tv/toffee/live.php?id=discovery_hd&e=.m3u8",
         type: "hls",
       },
     ],
   },
 
   // ─── INTERNATIONAL ────────────────────────────────────────────────────────────
-  {
-    id: "30",
-    name: "Al Jazeera English",
-    logo: "https://akashgo-mediaready.videoready.tv/akashgo/image/fetch/f_auto,fl_lossy,q_auto,w_180,h_180/https://tstatic.akash-go.com/cms-ui/images/custom-content/1735562546890.png",
-    category: "international",
-    quality: "HD",
-    nowPlaying: "World News",
-    servers: [
-      {
-        name: "Server 1",
-        url: "https://live-hls-web-aje.getaj.net/AJE/index.m3u8",
-        type: "hls",
-      },
-    ],
-  },
-  {
-    id: "31",
-    name: "BBC World News",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/BBC_World_News_2022_%28Boxed%29.svg/1200px-BBC_World_News_2022_%28Boxed%29.svg.png",
-    category: "international",
-    quality: "HD",
-    nowPlaying: "World News",
-    servers: [
-      {
-        name: "Server 1",
-        url: "https://a.files.bbci.co.uk/media/live/manifesto/audio_video/simulcast/hls/uk/hd/ak/bbc_world_news_english.m3u8",
-        type: "hls",
-      },
-    ],
-  },
   {
     id: "32",
     name: "DW (English)",

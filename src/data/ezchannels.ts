@@ -38,30 +38,25 @@ export const EZ_CHANNELS: EzChannel[] = [
     quality: "FHD",
     nowPlaying: "Live Match",
     servers: [
-      {
-        name: "TOFFEE 2",
-        url: "https://tv.ezshomadhan.com/toffee-player",
-        type: "iframe",
-      },
       { name: "BEIN 1", url: "https://cp11.adabmedia.com/hls2/sport.m3u8", type: "hls" },
       {
-        name: "BEIN 2 (Adab)",
-        url: "https://live.adabmedia.com/hls/bein1.m3u8",
+        name: "BEIN XTRA",
+        url: "https://bein-xtra-bein.amagi.tv/playlist.m3u8",
         type: "hls",
       },
       {
-        name: "Adab Live",
-        url: "https://live.adabmedia.com/hls/sport.m3u8",
+        name: "BEIN XTRA (ES)",
+        url: "https://dc1644a9jazgj.cloudfront.net/beIN_Sports_Xtra_Espanol.m3u8",
+        type: "hls",
+      },
+      {
+        name: "ESPN 8",
+        url: "https://d3b6q2ou5kp8ke.cloudfront.net/ESPNTheOcho.m3u8",
         type: "hls",
       },
       {
         name: "T Sports HD",
         url: "https://tvsen7.aynaott.com/tsports-hd/index.m3u8",
-        type: "hls",
-      },
-      {
-        name: "TSports (Live)",
-        url: "https://103.59.176.72:8083/live1/tracks-v1a1/mono.m3u8?token=123",
         type: "hls",
       },
       {
@@ -103,11 +98,6 @@ export const EZ_CHANNELS: EzChannel[] = [
         name: "Server 3 (Iframe)",
         url: "https://bdix.my.id/onair/e.php?channel=tsports2",
         type: "iframe",
-      },
-      {
-        name: "Server 4 (HLS)",
-        url: "https://103.59.176.72:8083/live1/tracks-v1a1/mono.m3u8?token=123",
-        type: "hls",
       },
     ],
   },

@@ -38,6 +38,11 @@ export const EZ_CHANNELS: EzChannel[] = [
     quality: "FHD",
     nowPlaying: "Live Match",
     servers: [
+      {
+        name: "TOFFEE 2",
+        url: "https://tv.ezshomadhan.com/toffee-player",
+        type: "iframe",
+      },
       { name: "BEIN 1", url: "https://cp11.adabmedia.com/hls2/sport.m3u8", type: "hls" },
       {
         name: "BEIN 2 (Adab)",
@@ -79,6 +84,11 @@ export const EZ_CHANNELS: EzChannel[] = [
     quality: "HD",
     nowPlaying: "Sports News",
     servers: [
+      {
+        name: "TOFFEE 2",
+        url: "https://tv.ezshomadhan.com/toffee-player",
+        type: "iframe",
+      },
       {
         name: "Server 1 (HD HLS)",
         url: "https://tvsen7.aynaott.com/tsports-hd/index.m3u8",

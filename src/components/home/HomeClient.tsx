@@ -1,111 +1,38 @@
 "use client";
 
-import { Play, RefreshCw, Search, Server, Tv, X } from "lucide-react";
+import { Play, RefreshCw, Search, Server, Tv, WifiOff, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { ChannelCategory, EzChannel } from "@/data/ezchannels";
-import { CATEGORIES, EZ_CHANNELS } from "@/data/ezchannels";
+import ChannelLogo from "@/components/shared/ChannelLogo";
 import { cn } from "@/lib/utils";
 
-// ── Types ─────────────────────────────────────────────────────────────────────
-
-interface GroupTeam {
-  rank: number;
-  team: string;
-  code: string;
-  played: number;
-  won: number;
-  drawn: number;
-  lost: number;
-  goalsFor: number;
-  goalsAgainst: number;
-  goalDifference: number;
-  points: number;
+interface IptvStream {
+  url: string;
+  quality: string | null;
+  label: string | null;
 }
 
-interface Group {
+interface IptvChannel {
+  id: string;
   name: string;
-  standings: GroupTeam[];
+  logo: string;
+  country: string;
+  categories: string[];
+  website: string | null;
+  streams: IptvStream[];
 }
 
-const COUNTRY_CODE: Record<string, string> = {
-  MEX: "mx",
-  RSA: "za",
-  KOR: "kr",
-  CZE: "cz",
-  SUI: "ch",
-  CAN: "ca",
-  BIH: "ba",
-  QAT: "qa",
-  BRA: "br",
-  MAR: "ma",
-  SCO: "gb-sct",
-  HAI: "ht",
-  USA: "us",
-  AUS: "au",
-  PAR: "py",
-  TUR: "tr",
-  GER: "de",
-  CIV: "ci",
-  ECU: "ec",
-  POR: "pt",
-  ARG: "ar",
-  FRA: "fr",
-  ENG: "gb-eng",
-  ESP: "es",
-  ITA: "it",
-  NED: "nl",
-  BEL: "be",
-  URU: "uy",
-  JPN: "jp",
-  COL: "co",
-  SEN: "sn",
-  DEN: "dk",
-  POL: "pl",
-  IRN: "ir",
-  SWE: "se",
-  NZL: "nz",
-  GHA: "gh",
-  HON: "hn",
-  CHI: "cl",
-  GBR: "gb",
-  OMA: "om",
-  CMR: "cm",
-  CRC: "cr",
-  NGA: "ng",
-  CHN: "cn",
-  IRQ: "iq",
-  NOR: "no",
-  KSA: "sa",
-  AUT: "at",
-  TUN: "tn",
-  PAN: "pa",
-  UKR: "ua",
-  PER: "pe",
-  EGY: "eg",
-  ROU: "ro",
-  FIN: "fi",
-  HUN: "hu",
-  SVN: "si",
-  SVK: "sk",
-  GEO: "ge",
-  ALB: "al",
-  ALG: "dz",
-  CIV2: "ci",
-  COD: "cd",
-  CPV: "cv",
-  JOR: "jo",
-  UZB: "uz",
-  CRO: "hr",
-  VEN: "ve",
-  BOL: "bo",
-  CUW: "cw",
-};
+const CATEGORY_TABS = [
+  { value: "all", label: "All Channels", icon: "📺" },
+  { value: "sports", label: "Sports", icon: "⚽" },
+  { value: "news", label: "News", icon: "📰" },
+  { value: "entertainment", label: "Entertainment", icon: "🎬" },
+  { value: "music", label: "Music", icon: "🎵" },
+  { value: "movies", label: "Movies", icon: "🎥" },
+  { value: "kids", label: "Kids", icon: "🧒" },
+];
 
-function flagUrl(code: string): string {
-  const iso = COUNTRY_CODE[code?.toUpperCase()] || code?.toLowerCase();
-  return `https://flagcdn.com/w40/${iso}.png`;
-}
+const FLAG_CDN = (code: string) => `https://flagcdn.com/32x24/${code.toLowerCase()}.png`;
 
 // ── Channel Card ──────────────────────────────────────────────────────────────
 
@@ -114,72 +41,79 @@ function ChannelCard({
   isPlaying,
   onClick,
 }: {
-  channel: EzChannel;
+  channel: IptvChannel;
   isPlaying: boolean;
-  onClick: (ch: EzChannel) => void;
+  onClick: (ch: IptvChannel) => void;
 }) {
   return (
     <button
       type="button"
       onClick={() => onClick(channel)}
       className={cn(
-        "ez-channel-card group relative block w-full cursor-pointer overflow-hidden rounded-2xl border text-left",
+        "ez-channel-card group relative block w-full cursor-pointer overflow-hidden rounded-2xl border text-left transition-all",
         "bg-white/[0.04]",
         isPlaying
-          ? "border-[#e94560]/60 shadow-[#e94560]/10 shadow-lg"
-          : "border-white/[0.06] hover:border-[#e94560]/40",
+          ? "border-primary/60 shadow-lg shadow-primary/10"
+          : "border-white/[0.06] hover:border-primary/40 hover:bg-white/[0.06]",
       )}
     >
       {/* Blurred logo backdrop */}
-      <div className="pointer-events-none absolute inset-0 opacity-20 transition-opacity group-hover:opacity-30">
-        <Image
-          src={channel.logo}
-          alt=""
-          fill
-          unoptimized
-          loading="eager"
-          className="scale-110 object-cover blur-xl"
-          onError={(e) => ((e.target as HTMLImageElement).style.display = "none")}
-        />
-      </div>
+      {channel.logo && (
+        <div className="pointer-events-none absolute inset-0 opacity-20 transition-opacity group-hover:opacity-30">
+          <Image
+            src={channel.logo}
+            alt=""
+            fill
+            unoptimized
+            className="scale-110 object-cover blur-xl"
+            onError={(e) => ((e.target as HTMLImageElement).style.display = "none")}
+          />
+        </div>
+      )}
 
       {/* Card body */}
       <div className="relative p-4">
         <div className="flex items-center gap-4">
           {/* Logo */}
           <div className="relative flex-shrink-0">
-            <Image
-              src={channel.logo}
-              alt={channel.name}
-              width={64}
-              height={64}
-              unoptimized
-              loading="eager"
-              className="h-16 w-16 rounded-xl border border-white/10 bg-white/5 object-cover shadow-lg transition-all group-hover:border-[#e94560]/30"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src =
-                  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23222'/%3E%3Ctext x='50%25' y='55%25' font-size='28' text-anchor='middle' fill='%23888'%3E📺%3C/text%3E%3C/svg%3E";
-              }}
+            <ChannelLogo
+              logo={channel.logo}
+              name={channel.name}
+              category={channel.categories[0]}
+              size="md"
             />
             {isPlaying && (
-              <span className="absolute -top-1 -right-1 h-3.5 w-3.5 animate-pulse rounded-full border-2 border-black bg-[#e94560]" />
+              <span className="absolute -top-1 -right-1 z-10 h-3.5 w-3.5 animate-pulse rounded-full border-2 border-background bg-primary" />
             )}
           </div>
 
           {/* Info */}
           <div className="min-w-0 flex-1">
-            <h3 className="mb-1.5 truncate font-semibold text-[15px] transition-colors group-hover:text-[#e94560]">
+            <h3 className="mb-1 truncate font-semibold text-sm transition-colors group-hover:text-primary">
               {channel.name}
             </h3>
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-md border border-[#e94560]/20 bg-[#e94560]/10 px-2 py-0.5 font-medium text-[#e94560] text-xs capitalize">
-                {channel.category}
-              </span>
-              <span className="font-medium text-gray-500 text-xs">{channel.quality}</span>
-              {channel.servers.length > 1 && (
-                <span className="flex items-center gap-0.5 text-gray-600 text-xs">
-                  <Server className="h-3 w-3" />
-                  {channel.servers.length}
+            <div className="flex flex-wrap items-center gap-1.5">
+              {channel.country && (
+                <Image
+                  src={FLAG_CDN(channel.country)}
+                  alt={channel.country}
+                  width={14}
+                  height={10}
+                  style={{ width: "auto", height: "auto" }}
+                  unoptimized
+                  className="rounded-sm"
+                  onError={(e) => ((e.target as HTMLImageElement).style.display = "none")}
+                />
+              )}
+              {channel.categories[0] && (
+                <span className="rounded-md border border-primary/20 bg-primary/10 px-1.5 py-0.5 font-medium text-[10px] text-primary capitalize">
+                  {channel.categories[0]}
+                </span>
+              )}
+              {channel.streams.length > 1 && (
+                <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
+                  <Server className="h-2.5 w-2.5" />
+                  {channel.streams.length}
                 </span>
               )}
             </div>
@@ -188,14 +122,14 @@ function ChannelCard({
           {/* Play button */}
           <div
             className={cn(
-              "flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl transition-all duration-300",
-              "group-hover:scale-110 group-hover:shadow-[#e94560]/25 group-hover:shadow-lg",
+              "flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl transition-all duration-300",
+              "group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-primary/25",
               isPlaying
-                ? "bg-[#e94560]"
-                : "bg-gradient-to-br from-[#e94560] to-[#c73452]",
+                ? "bg-primary text-primary-foreground"
+                : "bg-primary/20 text-primary group-hover:bg-primary group-hover:text-primary-foreground",
             )}
           >
-            <Play className="ml-0.5 h-4 w-4 fill-white text-white" />
+            <Play className="ml-0.5 h-4 w-4 fill-current" />
           </div>
         </div>
       </div>
@@ -203,46 +137,45 @@ function ChannelCard({
   );
 }
 
-// ── Inline HLS / iframe Player ────────────────────────────────────────────────
+// ── Inline HLS Player ──────────────────────────────────────────────────────────
 
 function InlinePlayer({
   channel,
-  serverIdx,
-  onServerChange,
+  streamIdx,
+  onStreamChange,
   onClose,
 }: {
-  channel: EzChannel;
-  serverIdx: number;
-  onServerChange: (i: number) => void;
+  channel: IptvChannel;
+  streamIdx: number;
+  onStreamChange: (i: number) => void;
   onClose: () => void;
 }) {
-  const server = channel.servers[serverIdx];
+  const stream = channel.streams[streamIdx];
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<any>(null);
 
   useEffect(() => {
-    if (server.type !== "hls") return;
+    if (!stream?.url) return;
     const video = videoRef.current;
     if (!video) return;
 
     let destroyed = false;
 
     async function load() {
-      // Dynamic import so HLS.js is only loaded client-side
       const { default: Hls } = await import("hls.js");
-      if (destroyed || !video) return;
+      if (destroyed || !video || !stream?.url) return;
 
       if (Hls.isSupported()) {
         hlsRef.current?.destroy();
         const hls = new Hls({ enableWorker: true });
         hlsRef.current = hls;
-        hls.loadSource(server.url);
+        hls.loadSource(stream.url);
         hls.attachMedia(video);
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
           video.play().catch(() => {});
         });
       } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-        video.src = server.url;
+        video.src = stream.url;
         video.play().catch(() => {});
       }
     }
@@ -253,124 +186,81 @@ function InlinePlayer({
       hlsRef.current?.destroy();
       hlsRef.current = null;
     };
-  }, [server]);
+  }, [stream]);
 
   return (
     <div className="mb-6 w-full animate-fade-in overflow-hidden rounded-2xl border border-white/10 bg-black/60">
       {/* Player header */}
-      <div className="flex items-center justify-between border-white/8 border-b bg-white/5 px-4 py-3">
+      <div className="flex items-center justify-between border-white/10 border-b bg-white/5 px-4 py-3">
         <div className="flex items-center gap-3">
-          <Image
-            src={channel.logo}
-            alt={channel.name}
-            width={28}
-            height={28}
-            unoptimized
-            className="h-7 w-7 rounded-lg border border-white/10 object-cover"
-            onError={(e) => ((e.target as HTMLImageElement).style.display = "none")}
-          />
+          {channel.logo ? (
+            <Image
+              src={channel.logo}
+              alt={channel.name}
+              width={28}
+              height={28}
+              unoptimized
+              className="h-7 w-7 rounded-lg border border-white/10 object-contain p-0.5"
+              onError={(e) => ((e.target as HTMLImageElement).style.display = "none")}
+            />
+          ) : (
+            <Tv className="h-5 w-5 text-primary" />
+          )}
           <div>
-            <p className="font-semibold text-sm text-white">{channel.name}</p>
-            <p className="text-gray-400 text-xs capitalize">{channel.category}</p>
+            <p className="font-semibold text-foreground text-sm">{channel.name}</p>
+            <p className="text-muted-foreground text-xs capitalize">
+              {channel.categories[0] ?? "IPTV"}
+            </p>
           </div>
-          <span className="flex items-center gap-1 rounded-full border border-[#e94560]/20 bg-[#e94560]/10 px-2 py-0.5 font-bold text-[#e94560] text-[10px]">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#e94560]" />
+          <span className="flex items-center gap-1 rounded-full border border-red-500/30 bg-red-500/10 px-2 py-0.5 font-bold text-[10px] text-red-400">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-400" />
             LIVE
           </span>
         </div>
         <button
           type="button"
           onClick={onClose}
-          className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/5 text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
+          className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
           aria-label="Close player"
         >
           <X className="h-4 w-4" />
         </button>
       </div>
 
-      {/* Video / iframe */}
+      {/* Video */}
       <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
         <div className="absolute inset-0">
-          {server.type === "iframe" ? (
-            server.url.includes("ezshomadhan.com") ? (
-              <div className="flex h-full w-full flex-col items-center justify-center bg-black/80 px-6 text-center">
-                <Tv className="mb-3 h-12 w-12 animate-pulse text-[#e94560]" />
-                <h3 className="mb-1 font-semibold text-base text-white">
-                  Direct Access Stream
-                </h3>
-                <p className="mb-4 max-w-sm text-gray-400 text-xs leading-relaxed">
-                  Toffee requires direct browser authentication and cannot be embedded.
-                  Click below to launch the live stream in a new tab.
-                </p>
-                <a
-                  href={server.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#e94560] to-[#ff6b8b] px-5 py-2.5 font-bold text-sm text-white shadow-[#e94560]/30 shadow-lg transition-all hover:scale-105 hover:shadow-[#e94560]/40 hover:shadow-xl"
-                >
-                  <span>Launch Stream</span>
-                  <span className="text-xs">↗</span>
-                </a>
-              </div>
-            ) : (
-              <iframe
-                src={server.url}
-                title="Live Channel Stream"
-                className="h-full w-full"
-                allowFullScreen
-                allow="autoplay; fullscreen"
-                style={{ border: "none" }}
-              />
-            )
-          ) : (
-            <video
-              ref={videoRef}
-              className="h-full w-full bg-black"
-              controls
-              autoPlay
-              playsInline
-            />
-          )}
+          <video
+            ref={videoRef}
+            className="h-full w-full bg-black"
+            controls
+            autoPlay
+            playsInline
+          />
         </div>
       </div>
 
-      {server.type === "iframe" && (
-        <div className="flex items-center justify-between gap-4 border-white/8 border-t bg-white/5 px-4 py-3">
-          <p className="text-gray-400 text-xs">
-            This server uses an external frame. If the player remains blank, open it
-            directly in a new tab:
-          </p>
-          <a
-            href={server.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="shrink-0 rounded-lg bg-white/10 px-3 py-1.5 font-semibold text-white text-xs transition-colors hover:bg-white/20"
-          >
-            Open Stream ↗
-          </a>
-        </div>
-      )}
-
       {/* Server switcher */}
-      {channel.servers.length > 1 && (
-        <div className="border-white/8 border-t bg-white/5 px-4 py-3">
-          <p className="mb-2 font-medium text-gray-500 text-xs uppercase tracking-wider">
+      {channel.streams.length > 1 && (
+        <div className="border-white/10 border-t bg-white/5 px-4 py-3">
+          <p className="mb-2 font-medium text-muted-foreground text-xs uppercase tracking-wider">
             Servers
           </p>
           <div className="flex flex-wrap gap-2">
-            {channel.servers.map((srv, i) => (
+            {channel.streams.map((s, i) => (
               <button
                 type="button"
-                key={`${srv.name}-${srv.url}-${i}`}
-                onClick={() => onServerChange(i)}
+                key={`${s.url}-${i}`}
+                onClick={() => onStreamChange(i)}
                 className={cn(
                   "whitespace-nowrap rounded-lg border px-3 py-1.5 font-medium text-xs transition-all",
-                  i === serverIdx
-                    ? "border-[#e94560] bg-[#e94560] text-white shadow-[#e94560]/30 shadow-md"
-                    : "border-white/10 bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white",
+                  i === streamIdx
+                    ? "border-primary bg-primary text-primary-foreground shadow-md shadow-primary/30"
+                    : "border-white/10 bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-foreground",
                 )}
               >
-                {srv.name}
+                Server {i + 1}
+                {s.quality ? ` · ${s.quality}` : ""}
               </button>
             ))}
           </div>
@@ -386,7 +276,7 @@ function ChannelSkeleton() {
   return (
     <div className="animate-pulse overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.04] p-4">
       <div className="flex items-center gap-4">
-        <div className="h-16 w-16 flex-shrink-0 rounded-xl bg-white/10" />
+        <div className="h-14 w-14 flex-shrink-0 rounded-xl bg-white/10" />
         <div className="flex-1 space-y-2">
           <div className="h-4 w-3/4 rounded-full bg-white/10" />
           <div className="flex gap-2">
@@ -394,7 +284,7 @@ function ChannelSkeleton() {
             <div className="h-3 w-10 rounded-full bg-white/8" />
           </div>
         </div>
-        <div className="h-11 w-11 flex-shrink-0 rounded-xl bg-white/10" />
+        <div className="h-10 w-10 flex-shrink-0 rounded-xl bg-white/10" />
       </div>
     </div>
   );
@@ -402,43 +292,54 @@ function ChannelSkeleton() {
 
 // ── Main Component ─────────────────────────────────────────────────────────────
 
-interface HomeClientProps {
-  initialChannels: EzChannel[];
-}
+export default function HomeClient() {
+  const [channels, setChannels] = useState<IptvChannel[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-export default function HomeClient({ initialChannels }: HomeClientProps) {
-  const [channels, setChannels] = useState<EzChannel[]>(initialChannels || EZ_CHANNELS);
-  const [loading, setLoading] = useState(false);
-
-  const [activeCategory, setActiveCategory] = useState<ChannelCategory | "all">("all");
+  const [activeCategory, setActiveCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const [activeChannel, setActiveChannel] = useState<EzChannel | null>(null);
-  const [serverIdx, setServerIdx] = useState(0);
+  const [activeChannel, setActiveChannel] = useState<IptvChannel | null>(null);
+  const [streamIdx, setStreamIdx] = useState(0);
 
   const playerRef = useRef<HTMLDivElement>(null);
 
-  // Filtered channels
-  const filtered = useMemo(() => {
-    const list =
-      activeCategory === "all"
-        ? channels
-        : channels.filter((c) => c.category === activeCategory);
+  async function load(cat = activeCategory) {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(
+        `/api/channels?category=${encodeURIComponent(cat)}&limit=200`,
+      );
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setChannels(data.channels ?? []);
+    } catch {
+      setError("Could not load IPTV channels. Check your connection.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
-    if (!searchQuery.trim()) return list;
+  useEffect(() => {
+    void load(activeCategory);
+  }, [activeCategory]);
+
+  const filtered = useMemo(() => {
+    if (!searchQuery.trim()) return channels;
     const q = searchQuery.toLowerCase();
-    return list.filter(
+    return channels.filter(
       (c) =>
         c.name.toLowerCase().includes(q) ||
-        c.category.toLowerCase().includes(q) ||
-        c.nowPlaying.toLowerCase().includes(q),
+        c.country.toLowerCase().includes(q) ||
+        c.categories.some((cat) => cat.toLowerCase().includes(q)),
     );
-  }, [channels, activeCategory, searchQuery]);
+  }, [channels, searchQuery]);
 
-  const handlePlay = (ch: EzChannel) => {
+  const handlePlay = (ch: IptvChannel) => {
     setActiveChannel(ch);
-    setServerIdx(0);
-    // Scroll to player
+    setStreamIdx(0);
     setTimeout(
       () => playerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
       50,
@@ -447,14 +348,8 @@ export default function HomeClient({ initialChannels }: HomeClientProps) {
 
   const handleClose = () => {
     setActiveChannel(null);
-    setServerIdx(0);
+    setStreamIdx(0);
   };
-
-  const totalCount = channels.length;
-  const categoryCount =
-    activeCategory === "all"
-      ? totalCount
-      : channels.filter((c) => c.category === activeCategory).length;
 
   return (
     <main className="mx-auto w-full max-w-screen-xl flex-1 px-4 py-6 sm:px-6 lg:px-8">
@@ -463,8 +358,8 @@ export default function HomeClient({ initialChannels }: HomeClientProps) {
         {activeChannel && (
           <InlinePlayer
             channel={activeChannel}
-            serverIdx={serverIdx}
-            onServerChange={setServerIdx}
+            streamIdx={streamIdx}
+            onStreamChange={setStreamIdx}
             onClose={handleClose}
           />
         )}
@@ -474,24 +369,27 @@ export default function HomeClient({ initialChannels }: HomeClientProps) {
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="flex items-center gap-2 font-bold text-lg tracking-tight">
-            <Tv className="h-5 w-5 text-[#e94560]" />
-            Live TV
+            <Tv className="h-5 w-5 text-primary" />
+            Live TV Channels
           </h2>
-          <p className="mt-0.5 text-gray-500 text-xs">
-            {categoryCount} channel{categoryCount !== 1 ? "s" : ""} available
-          </p>
+          {!loading && (
+            <p className="mt-0.5 text-muted-foreground text-xs">
+              {filtered.length.toLocaleString()} channel{filtered.length !== 1 ? "s" : ""}{" "}
+              available
+            </p>
+          )}
         </div>
 
         {/* Search */}
         <div className="relative w-full sm:w-64">
-          <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-500" />
+          <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             id="channel-search"
             type="text"
             placeholder="Search channels…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-xl border border-white/8 bg-white/5 py-2 pr-8 pl-9 text-sm text-white transition-all placeholder:text-gray-600 focus:border-[#e94560]/30 focus:outline-none focus:ring-2 focus:ring-[#e94560]/30"
+            className="w-full rounded-xl border border-white/[0.08] bg-white/[0.04] py-2 pr-8 pl-9 text-foreground text-sm transition-all placeholder:text-muted-foreground/60 focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
           {searchQuery && (
             <button
@@ -499,7 +397,7 @@ export default function HomeClient({ initialChannels }: HomeClientProps) {
               onClick={() => setSearchQuery("")}
               className="absolute top-1/2 right-2.5 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-white/20"
             >
-              <X className="h-3 w-3 text-gray-400" />
+              <X className="h-3 w-3 text-muted-foreground" />
             </button>
           )}
         </div>
@@ -507,17 +405,17 @@ export default function HomeClient({ initialChannels }: HomeClientProps) {
 
       {/* ── Category Filter Tabs ────────────────────────────────────────────── */}
       <div className="scrollbar-hide mb-5 flex items-center gap-2 overflow-x-auto pb-3">
-        {CATEGORIES.map((cat) => (
+        {CATEGORY_TABS.map((cat) => (
           <button
             type="button"
             key={cat.value}
             id={`filter-${cat.value}`}
-            onClick={() => setActiveCategory(cat.value as ChannelCategory | "all")}
+            onClick={() => setActiveCategory(cat.value)}
             className={cn(
-              "flex items-center gap-1.5 whitespace-nowrap rounded-xl border px-5 py-2.5 font-medium text-sm transition-all",
+              "flex items-center gap-1.5 whitespace-nowrap rounded-xl border px-4 py-2 font-medium text-sm transition-all",
               activeCategory === cat.value
-                ? "border-[#e94560] bg-[#e94560] text-white shadow-[#e94560]/20 shadow-lg"
-                : "border-white/[0.06] bg-white/5 text-gray-400 hover:bg-white/8 hover:text-white",
+                ? "border-primary bg-primary text-primary-foreground shadow-md shadow-primary/20"
+                : "border-white/[0.06] bg-white/[0.04] text-muted-foreground hover:bg-white/[0.08] hover:text-foreground",
             )}
           >
             <span>{cat.icon}</span>
@@ -533,12 +431,27 @@ export default function HomeClient({ initialChannels }: HomeClientProps) {
             <ChannelSkeleton key={id} />
           ))}
         </div>
+      ) : error ? (
+        <div className="flex flex-col items-center gap-4 rounded-2xl border border-red-500/20 bg-red-500/5 py-16 text-center">
+          <WifiOff className="h-12 w-12 text-red-400/60" />
+          <div>
+            <h3 className="font-semibold text-foreground">Connection Error</h3>
+            <p className="mt-1 text-muted-foreground text-sm">{error}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => load(activeCategory)}
+            className="rounded-xl bg-primary px-5 py-2.5 font-semibold text-primary-foreground text-sm hover:opacity-90"
+          >
+            Try Again
+          </button>
+        </div>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-4 py-24 text-center">
-          <Tv className="h-14 w-14 text-gray-700" />
+          <Tv className="h-14 w-14 text-muted-foreground/30" />
           <div>
-            <h3 className="mb-1 font-semibold text-white">No channels found</h3>
-            <p className="text-gray-500 text-sm">
+            <h3 className="mb-1 font-semibold text-foreground">No channels found</h3>
+            <p className="text-muted-foreground text-sm">
               {searchQuery
                 ? `No results for "${searchQuery}".`
                 : `No channels in this category right now.`}
@@ -550,7 +463,7 @@ export default function HomeClient({ initialChannels }: HomeClientProps) {
               setActiveCategory("all");
               setSearchQuery("");
             }}
-            className="mt-2 flex items-center gap-2 rounded-xl bg-[#e94560] px-4 py-2 font-medium text-sm text-white transition-colors hover:bg-[#c73452]"
+            className="mt-2 flex items-center gap-2 rounded-xl bg-primary px-4 py-2 font-medium text-primary-foreground text-sm transition-colors hover:opacity-90"
           >
             <RefreshCw className="h-3.5 w-3.5" />
             Show all channels
@@ -562,7 +475,7 @@ export default function HomeClient({ initialChannels }: HomeClientProps) {
             <div
               key={ch.id}
               className="card-enter"
-              style={{ animationDelay: `${i * 40}ms` }}
+              style={{ animationDelay: `${i * 30}ms` }}
             >
               <ChannelCard
                 channel={ch}

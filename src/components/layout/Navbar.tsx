@@ -142,7 +142,7 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
-            <div className="mt-2 border-t border-white/[0.06] pt-2">
+            <div className="mt-2 border-white/[0.06] border-t pt-2">
               {[
                 { href: "/channels", label: "📺 Channel Directory" },
                 { href: "/blog", label: "📝 Blog" },

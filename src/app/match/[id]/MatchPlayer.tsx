@@ -165,7 +165,7 @@ export default function StreamPlayer({ match, streams, loadingStreams }: Props) 
           <div className="flex flex-wrap gap-2">
             {streams.map((stream, i) => (
               <button
-                key={`${stream.source}-${stream.streamNo ?? i}`}
+                key={stream.id || `stream-btn-${i}`}
                 type="button"
                 onClick={() => handlePlay(stream)}
                 className={cn(

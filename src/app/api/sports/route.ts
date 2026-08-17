@@ -2,12 +2,18 @@ import { NextResponse } from "next/server";
 
 export const revalidate = 60; // Cache for 1 minute
 
-// ESPN Live Public Scoreboard Endpoints
-const ESPN_ENDPOINTS = [
-  {
-    category: "football",
-    url: "https://site.api.espn.com/apis/site/v2/sports/soccer/all/scoreboard",
-  },
+const SOCCER_ENDPOINTS = [
+  "all",
+  "eng.1",
+  "esp.1",
+  "ita.1",
+  "ger.1",
+  "fra.1",
+  "usa.1",
+  "uefa.champions",
+];
+
+const OTHER_ENDPOINTS = [
   {
     category: "baseball",
     url: "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard",
@@ -26,7 +32,7 @@ const ESPN_ENDPOINTS = [
   },
 ];
 
-function transformEspnEvent(event: any, category: string): any {
+function transformEspnEvent(event: any, category = "football"): any {
   const comp = event.competitions?.[0];
   const homeComp = comp?.competitors?.find((c: any) => c.homeAway === "home");
   const awayComp = comp?.competitors?.find((c: any) => c.homeAway === "away");
@@ -37,13 +43,17 @@ function transformEspnEvent(event: any, category: string): any {
   const awayLogo = awayComp?.team?.logo ?? null;
 
   const state = event.status?.type?.state; // "in" = live, "pre" = upcoming, "post" = finished
-  const isLive = state === "in";
+  const isLive = state === "in" || event.status?.type?.name === "STATUS_IN_PROGRESS";
 
   const title = event.name || `${homeName} vs ${awayName}`;
-  const leagueName = comp?.league?.name || event.season?.slug || category;
+  const leagueName =
+    comp?.league?.name ||
+    event.league?.name ||
+    event.season?.slug ||
+    (category === "football" ? "Football" : category);
 
   return {
-    id: event.id || `match-${Math.random()}`,
+    id: String(event.id || `match-${Math.random()}`),
     title,
     category,
     league: leagueName,
@@ -57,8 +67,8 @@ function transformEspnEvent(event: any, category: string): any {
       away: { name: awayName, badge: awayLogo, score: awayComp?.score ?? "0" },
     },
     sources: [
-      { source: "server1", id: event.id },
-      { source: "server2", id: event.id },
+      { source: "server1", id: String(event.id) },
+      { source: "server2", id: String(event.id) },
     ],
   };
 }
@@ -70,61 +80,105 @@ export async function GET(req: Request) {
   const matchId = searchParams.get("matchId");
 
   // Stream request
-  if (source && matchId) {
+  if (matchId) {
     return NextResponse.json([
       {
         id: `stream-1-${matchId}`,
         streamNo: 1,
-        language: "English",
+        language: "Server 1",
         hd: true,
-        embedUrl: "https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8",
+        embedUrl: `https://www.freeliveiptv.com/match/${matchId}`,
         source: "server1",
-        m3u8: "https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8",
       },
       {
         id: `stream-2-${matchId}`,
         streamNo: 2,
-        language: "English",
+        language: "Server 2",
         hd: true,
-        embedUrl: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+        embedUrl: `https://daddylive.mp/embed/stream-${matchId}.php`,
         source: "server2",
-        m3u8: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+      },
+      {
+        id: `stream-3-${matchId}`,
+        streamNo: 3,
+        language: "Server 3",
+        hd: true,
+        embedUrl: `https://vidsrc.me/embed/sports/${matchId}`,
+        source: "server3",
+      },
+      {
+        id: `stream-4-${matchId}`,
+        streamNo: 4,
+        language: "Server 4",
+        hd: true,
+        embedUrl: `https://streamed.su/watch/${matchId}`,
+        source: "server4",
       },
     ]);
   }
 
   try {
-    let endpointsToFetch = ESPN_ENDPOINTS;
+    const matchMap = new Map<string, any>();
 
-    if (endpoint === "football") {
-      endpointsToFetch = ESPN_ENDPOINTS.filter((e) => e.category === "football");
-    } else if (endpoint !== "all" && endpoint !== "live") {
-      endpointsToFetch = ESPN_ENDPOINTS.filter((e) => e.category === endpoint);
+    if (endpoint === "football" || endpoint === "all" || endpoint === "live") {
+      const soccerFetches = SOCCER_ENDPOINTS.map(async (leagueKey) => {
+        try {
+          const res = await fetch(
+            `https://site.api.espn.com/apis/site/v2/sports/soccer/${leagueKey}/scoreboard`,
+            {
+              headers: {
+                "User-Agent":
+                  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+                Accept: "application/json",
+              },
+              next: { revalidate: 60 },
+            },
+          );
+          if (!res.ok) return;
+          const data = await res.json();
+          const events = data.events || [];
+          for (const ev of events) {
+            const transformed = transformEspnEvent(ev, "football");
+            if (!matchMap.has(transformed.id)) {
+              matchMap.set(transformed.id, transformed);
+            }
+          }
+        } catch {
+          // ignore individual fetch errors
+        }
+      });
+      await Promise.all(soccerFetches);
     }
 
-    const fetchedResults = await Promise.allSettled(
-      endpointsToFetch.map(async (item) => {
-        const res = await fetch(item.url, {
-          headers: {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-          },
-          next: { revalidate: 60 },
-        });
-        if (!res.ok) return [];
-        const data = await res.json();
-        const events = data.events || [];
-        return events.map((ev: any) => transformEspnEvent(ev, item.category));
-      }),
-    );
-
-    let allMatches: any[] = [];
-    for (const res of fetchedResults) {
-      if (res.status === "fulfilled" && Array.isArray(res.value)) {
-        allMatches.push(...res.value);
-      }
+    if (endpoint === "all") {
+      const otherFetches = OTHER_ENDPOINTS.map(async (item) => {
+        try {
+          const res = await fetch(item.url, {
+            headers: {
+              "User-Agent":
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+              Accept: "application/json",
+            },
+            next: { revalidate: 60 },
+          });
+          if (!res.ok) return;
+          const data = await res.json();
+          const events = data.events || [];
+          for (const ev of events) {
+            const transformed = transformEspnEvent(ev, item.category);
+            if (!matchMap.has(transformed.id)) {
+              matchMap.set(transformed.id, transformed);
+            }
+          }
+        } catch {
+          // ignore
+        }
+      });
+      await Promise.all(otherFetches);
     }
 
-    // Filter live if requested
+    let allMatches = Array.from(matchMap.values());
+
     if (endpoint === "live") {
       allMatches = allMatches.filter((m) => m.isLive);
     }
@@ -138,7 +192,7 @@ export async function GET(req: Request) {
       },
     });
   } catch (error: any) {
-    console.error("[/api/sports] Error fetching live matches:", error);
-    return NextResponse.json([], { status: 500 });
+    console.error("[/api/sports] Error fetching matches:", error);
+    return NextResponse.json([]);
   }
 }

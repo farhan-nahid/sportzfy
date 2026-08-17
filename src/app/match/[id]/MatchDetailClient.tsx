@@ -46,19 +46,15 @@ export default function MatchDetailClient({ matchId }: Props) {
             .slice(0, 5);
           setRelated(rel);
 
-          // Fetch streams for each source
-          if (found.sources && found.sources.length > 0) {
-            setLoadingStreams(true);
-            const streamResults = await Promise.allSettled(
-              found.sources.map((src) => fetchMatchStreams(src.source, matchId)),
-            );
-            const allStreams: StreamedStream[] = [];
-            for (const result of streamResults) {
-              if (result.status === "fulfilled" && Array.isArray(result.value)) {
-                allStreams.push(...result.value);
-              }
-            }
-            setStreams(allStreams);
+          // Fetch streams for match
+          setLoadingStreams(true);
+          try {
+            const matchStreams = await fetchMatchStreams("server1", matchId);
+            setStreams(Array.isArray(matchStreams) ? matchStreams : []);
+          } catch {
+            setStreams([]);
+          } finally {
+            setLoadingStreams(false);
           }
         }
       } catch {
@@ -181,7 +177,7 @@ export default function MatchDetailClient({ matchId }: Props) {
       </section>
 
       <main className="mx-auto w-full max-w-screen-xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
-        <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
+        <div className="grid gap-8 lg:grid-cols-[1fr_340px] lg:items-start">
           {/* Player column */}
           <div>
             <StreamPlayer
@@ -272,7 +268,7 @@ export default function MatchDetailClient({ matchId }: Props) {
           </div>
 
           {/* Sidebar */}
-          <aside className="space-y-6">
+          <aside className="sticky top-20 space-y-6">
             {related.length > 0 && (
               <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5">
                 <h3 className="mb-3 font-bold text-foreground text-sm">

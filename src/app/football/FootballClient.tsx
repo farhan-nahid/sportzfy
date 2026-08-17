@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import MatchCard from "@/components/shared/MatchCard";
 import type { StreamedMatch } from "@/lib/streamed";
-import { fetchFootballMatches, isMatchLive } from "@/lib/streamed";
+import { groupMatchesByDay, isMatchLive } from "@/lib/streamed";
 import { cn } from "@/lib/utils";
 
 const LEAGUES = [
@@ -19,6 +19,70 @@ const LEAGUES = [
   { name: "MLS", flag: "🇺🇸", searchKey: "mls" },
 ];
 
+function transformEspnEvent(event: any, category = "football"): StreamedMatch {
+  const comp = event.competitions?.[0];
+  const homeComp = comp?.competitors?.find((c: any) => c.homeAway === "home");
+  const awayComp = comp?.competitors?.find((c: any) => c.homeAway === "away");
+
+  const homeName = homeComp?.team?.displayName || homeComp?.team?.name || "Home Team";
+  const awayName = awayComp?.team?.displayName || awayComp?.team?.name || "Away Team";
+  const homeLogo = homeComp?.team?.logo ?? null;
+  const awayLogo = awayComp?.team?.logo ?? null;
+
+  const state = event.status?.type?.state;
+  const title = event.name || `${homeName} vs ${awayName}`;
+  const leagueName =
+    comp?.league?.name || event.league?.name || event.season?.slug || "Football";
+
+  return {
+    id: String(event.id || `match-${Math.random()}`),
+    title,
+    category,
+    league: leagueName,
+    date: new Date(event.date).getTime(),
+    popular: true,
+    teams: {
+      home: { name: homeName, badge: homeLogo, score: homeComp?.score ?? "0" },
+      away: { name: awayName, badge: awayLogo, score: awayComp?.score ?? "0" },
+    },
+    sources: [
+      { source: "server1", id: String(event.id) },
+      { source: "server2", id: String(event.id) },
+    ],
+  };
+}
+
+async function loadFootballData(): Promise<StreamedMatch[]> {
+  // 1. Internal server API
+  try {
+    const res = await fetch("/api/sports?endpoint=football");
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        return data;
+      }
+    }
+  } catch {
+    // Proceed to direct fetch
+  }
+
+  // 2. Direct browser fetch to ESPN API (works globally with CORS Access-Control-Allow-Origin: *)
+  try {
+    const espnRes = await fetch(
+      "https://site.api.espn.com/apis/site/v2/sports/soccer/all/scoreboard",
+    );
+    if (espnRes.ok) {
+      const espnData = await espnRes.json();
+      const events = espnData.events || [];
+      return events.map((ev: any) => transformEspnEvent(ev, "football"));
+    }
+  } catch {
+    //
+  }
+
+  return [];
+}
+
 export default function FootballClient() {
   const [matches, setMatches] = useState<StreamedMatch[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,8 +93,11 @@ export default function FootballClient() {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchFootballMatches();
-      setMatches(Array.isArray(data) ? data : []);
+      const data = await loadFootballData();
+      setMatches(data);
+      if (data.length === 0) {
+        setError("No live or upcoming football fixtures found right now.");
+      }
     } catch {
       setError("Could not load football fixtures. Check your connection.");
     } finally {
@@ -50,21 +117,42 @@ export default function FootballClient() {
     return matches.filter((m) => {
       const league = (m.league || "").toLowerCase();
       const title = (m.title || "").toLowerCase();
-      return league.includes(key) || title.includes(key);
+      const home = (m.teams?.home?.name || "").toLowerCase();
+      const away = (m.teams?.away?.name || "").toLowerCase();
+      return (
+        league.includes(key) ||
+        title.includes(key) ||
+        home.includes(key) ||
+        away.includes(key)
+      );
     });
   }, [matches, selectedLeague]);
 
   const liveMatches = useMemo(
-    () => filteredMatches.filter(isMatchLive),
+    () => filteredMatches.filter((m) => isMatchLive(m)),
     [filteredMatches],
   );
+
   const upcomingMatches = useMemo(
     () =>
       filteredMatches
-        .filter((m) => !isMatchLive(m) && m.date > Date.now())
+        .filter((m) => !isMatchLive(m) && m.date >= Date.now() - 2 * 60 * 60 * 1000)
         .sort((a, b) => a.date - b.date),
     [filteredMatches],
   );
+
+  const otherMatches = useMemo(
+    () => filteredMatches.filter((m) => !isMatchLive(m) && !upcomingMatches.includes(m)),
+    [filteredMatches, upcomingMatches],
+  );
+
+  const groupedUpcoming = useMemo(
+    () => groupMatchesByDay(upcomingMatches),
+    [upcomingMatches],
+  );
+
+  const groupedOther = useMemo(() => groupMatchesByDay(otherMatches), [otherMatches]);
+
   const todayUpcoming = useMemo(() => {
     const end = new Date();
     end.setHours(23, 59, 59, 999);
@@ -80,7 +168,7 @@ export default function FootballClient() {
     );
   }
 
-  if (error) {
+  if (error && matches.length === 0) {
     return (
       <div className="flex flex-col items-center gap-4 rounded-2xl border border-red-500/20 bg-red-500/5 py-16 text-center">
         <WifiOff className="h-12 w-12 text-red-400/60" />
@@ -146,7 +234,7 @@ export default function FootballClient() {
         </div>
       </section>
 
-      <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
+      <div className="grid gap-8 lg:grid-cols-[1fr_340px] lg:items-start">
         {/* Main column */}
         <div className="space-y-8">
           {/* Refresh & status info */}
@@ -188,16 +276,54 @@ export default function FootballClient() {
           )}
 
           {/* Upcoming */}
-          {upcomingMatches.length > 0 && (
-            <section>
-              <h2 className="mb-3 font-bold text-foreground text-lg">
-                Upcoming Fixtures
+          {groupedUpcoming.length > 0 && (
+            <section className="space-y-6">
+              <h2 className="font-bold text-foreground text-lg">
+                Upcoming & Scheduled Fixtures
               </h2>
-              <div className="space-y-2">
-                {upcomingMatches.map((m) => (
-                  <MatchCard key={m.id} match={m} showDate />
-                ))}
-              </div>
+              {groupedUpcoming.map((group) => (
+                <div key={group.date} className="space-y-3">
+                  <div className="flex items-center gap-2 border-white/[0.06] border-b pb-2">
+                    <span className="font-bold text-primary text-xs uppercase tracking-wider">
+                      📅 {group.label}
+                    </span>
+                    <span className="rounded-full bg-white/5 px-2 py-0.5 font-medium text-[10px] text-muted-foreground">
+                      {group.matches.length} match{group.matches.length !== 1 ? "es" : ""}
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    {group.matches.map((m) => (
+                      <MatchCard key={m.id} match={m} showDate={false} />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </section>
+          )}
+
+          {/* Other / Recent Matches */}
+          {groupedOther.length > 0 && (
+            <section className="space-y-6">
+              <h2 className="font-bold text-foreground text-lg">
+                Other Football Matches
+              </h2>
+              {groupedOther.map((group) => (
+                <div key={group.date} className="space-y-3">
+                  <div className="flex items-center gap-2 border-white/[0.06] border-b pb-2">
+                    <span className="font-bold text-muted-foreground text-xs uppercase tracking-wider">
+                      📅 {group.label}
+                    </span>
+                    <span className="rounded-full bg-white/5 px-2 py-0.5 font-medium text-[10px] text-muted-foreground">
+                      {group.matches.length} match{group.matches.length !== 1 ? "es" : ""}
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    {group.matches.map((m) => (
+                      <MatchCard key={m.id} match={m} showDate={false} />
+                    ))}
+                  </div>
+                </div>
+              ))}
             </section>
           )}
 
@@ -221,7 +347,7 @@ export default function FootballClient() {
         </div>
 
         {/* Sidebar */}
-        <aside className="space-y-6">
+        <aside className="sticky top-20 space-y-6">
           <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5">
             <h3 className="mb-3 font-bold text-foreground text-sm">Quick Stats</h3>
             <dl className="space-y-3">

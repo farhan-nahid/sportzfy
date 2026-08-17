@@ -13,6 +13,8 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "itcnbd.live" },
       { protocol: "https", hostname: "images.seeklogo.com" },
       { protocol: "https", hostname: "i.postimg.cc" },
+      { protocol: "https", hostname: "streamed.su" },
+      { protocol: "https", hostname: "cdn.streamed.su" },
     ],
   },
 };

@@ -4,28 +4,11 @@ import { Loader2, RefreshCw, Trophy, WifiOff } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
-
-interface TeamStanding {
-  rank: number;
-  teamId: string;
-  teamName: string;
-  teamLogo: string | null;
-  played: number;
-  won: number;
-  drawn: number;
-  lost: number;
-  goalsFor: number;
-  goalsAgainst: number;
-  goalDiff: number;
-  points: number;
-}
-
-interface StandingsResponse {
-  league: string;
-  leagueSlug: string;
-  season: number;
-  standings: TeamStanding[];
-}
+import {
+  LEAGUE_SLUGS,
+  type StandingsResponse,
+  parseEspnStandings,
+} from "@/lib/standings";
 
 const LEAGUE_TABS = [
   { slug: "eng.1", name: "Premier League", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿" },
@@ -45,13 +28,41 @@ export default function StandingsClient() {
   async function load(slug = selectedLeague) {
     setLoading(true);
     setError(null);
+
+    const espnUrl = `https://site.api.espn.com/apis/v2/sports/soccer/${encodeURIComponent(slug)}/standings`;
+
     try {
-      const res = await fetch(`/api/standings?league=${encodeURIComponent(slug)}`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const json = await res.json();
-      setData(json);
+      // 1. Direct live browser fetch to ESPN API (works globally with CORS Access-Control-Allow-Origin: *)
+      const espnRes = await fetch(espnUrl);
+      if (espnRes.ok) {
+        const json = await espnRes.json();
+        const standings = parseEspnStandings(json);
+        if (standings.length > 0) {
+          setData({
+            league: LEAGUE_SLUGS[slug] || json.name || "League Standings",
+            leagueSlug: slug,
+            season: json.season || new Date().getFullYear(),
+            standings,
+          });
+          setLoading(false);
+          return;
+        }
+      }
+
+      // 2. Secondary attempt via internal API route
+      const apiRes = await fetch(`/api/standings?league=${encodeURIComponent(slug)}`);
+      if (apiRes.ok) {
+        const apiJson: StandingsResponse = await apiRes.json();
+        if (apiJson.standings && apiJson.standings.length > 0) {
+          setData(apiJson);
+          setLoading(false);
+          return;
+        }
+      }
+
+      throw new Error("Unable to fetch live standings.");
     } catch {
-      setError("Could not load standings. Check your connection.");
+      setError("Could not load live standings. Please check your internet connection.");
     } finally {
       setLoading(false);
     }
@@ -99,7 +110,7 @@ export default function StandingsClient() {
               {activeLeague?.flag} {data?.league || activeLeague?.name}
             </h2>
             <p className="text-muted-foreground text-xs">
-              Official League Standings & Point Table
+              Official Live League Standings & Point Table
             </p>
           </div>
         </div>
@@ -119,7 +130,7 @@ export default function StandingsClient() {
       {loading && (
         <div className="flex flex-col items-center gap-4 py-20">
           <Loader2 className="h-10 w-10 animate-spin text-primary" />
-          <p className="text-muted-foreground text-sm">Loading point table…</p>
+          <p className="text-muted-foreground text-sm">Loading live point table…</p>
         </div>
       )}
 

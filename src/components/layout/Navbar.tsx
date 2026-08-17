@@ -1,66 +1,34 @@
 "use client";
 
-import { Menu, Moon, Sun, Trophy, Tv2, X } from "lucide-react";
+import { Menu, Moon, Sun, Tv2, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useTheme } from "./ThemeProvider";
 
-function LiveClock() {
-  const [time, setTime] = useState<Date | null>(null);
-
-  useEffect(() => {
-    setTime(new Date());
-    const id = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(id);
-  }, []);
-
-  if (!time) {
-    return (
-      <div className="hidden items-center gap-1 rounded-full border border-white/8 bg-muted/30 px-3 py-1.5 text-muted-foreground text-xs sm:flex">
-        <span className="w-[4.5rem] text-center font-mono font-semibold text-foreground">
-          --:--:--
-        </span>
-        <span>Local</span>
-      </div>
-    );
-  }
-
-  const hh = time.getHours().toString().padStart(2, "0");
-  const mm = time.getMinutes().toString().padStart(2, "0");
-  const ss = time.getSeconds().toString().padStart(2, "0");
-
-  return (
-    <div className="hidden items-center gap-1.5 rounded-full border border-white/8 bg-muted/20 px-3 py-1.5 text-muted-foreground text-xs sm:flex">
-      <span className="font-mono font-semibold text-foreground tabular-nums">
-        {hh}:{mm}
-        <span className="text-primary">:{ss}</span>
-      </span>
-      <span>Local</span>
-    </div>
-  );
-}
+const NAV_LINKS = [
+  { href: "/", label: "All IPTV" },
+  { href: "/live", label: "Live Sports" },
+  { href: "/football", label: "Football" },
+  { href: "/standings", label: "Point Table" },
+];
 
 function ThemeToggle() {
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === "dark";
-
   return (
     <button
       type="button"
       id="theme-toggle-btn"
       onClick={toggleTheme}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-      title={isDark ? "Switch to light mode" : "Switch to dark mode"}
       className="group relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-muted/20 transition-all duration-200 hover:border-primary/40 hover:bg-muted/40"
     >
-      {/* Sun icon */}
       <Sun
         className={`absolute h-4 w-4 text-amber-400 transition-all duration-300 ${
           isDark ? "rotate-90 scale-50 opacity-0" : "rotate-0 scale-100 opacity-100"
         }`}
       />
-      {/* Moon icon */}
       <Moon
         className={`absolute h-4 w-4 text-primary transition-all duration-300 ${
           isDark ? "rotate-0 scale-100 opacity-100" : "-rotate-90 scale-50 opacity-0"
@@ -81,20 +49,24 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
   return (
     <header
       className={`sticky top-0 z-50 w-full transition-all duration-300 ${
         scrolled || mobileMenuOpen
-          ? "border-white/8 border-b bg-background/60 shadow-black/20 shadow-lg backdrop-blur-xl"
+          ? "border-white/8 border-b bg-background/70 shadow-black/20 shadow-lg backdrop-blur-xl"
           : "border-transparent border-b bg-transparent backdrop-blur-md"
       }`}
     >
       <div className="mx-auto flex h-16 max-w-screen-xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-        {/* Logo and Nav links */}
+        {/* Logo */}
         <div className="flex shrink-0 items-center gap-6">
           <Link href="/" className="group flex items-center gap-2.5">
             <div className="relative flex h-9 w-9 items-center justify-center">
-              {/* Icon container */}
               <div className="gradient-brand relative z-10 flex h-9 w-9 items-center justify-center rounded-xl shadow-lg">
                 <Tv2 className="h-5 w-5 text-white" />
                 <span className="absolute -top-1 -right-1 flex h-3 w-3 items-center justify-center rounded-full border-2 border-background bg-red-500">
@@ -107,46 +79,38 @@ export default function Navbar() {
             </span>
           </Link>
 
-          <nav className="hidden h-8 items-center gap-1.5 border-white/10 border-l pl-5 md:flex">
-            <Link
-              href="/"
-              className={`rounded-lg px-3 py-1.5 font-semibold text-xs tracking-wide transition-all ${
-                pathname === "/"
-                  ? "border border-primary/20 bg-primary/15 text-primary"
-                  : "border border-transparent text-muted-foreground hover:bg-muted/30 hover:text-foreground"
-              }`}
-            >
-              Live Channels
-            </Link>
-            <Link
-              href="/world-cup"
-              className={`flex items-center gap-1 rounded-lg px-3 py-1.5 font-semibold text-xs tracking-wide transition-all ${
-                pathname === "/world-cup"
-                  ? "border border-amber-500/25 bg-amber-500/15 text-amber-400"
-                  : "border border-transparent text-muted-foreground hover:bg-muted/30 hover:text-foreground"
-              }`}
-            >
-              <Trophy className="h-3.5 w-3.5 text-amber-400" />
-              World Cup 2026
-            </Link>
+          {/* Desktop nav */}
+          <nav className="hidden h-8 items-center gap-0.5 border-white/10 border-l pl-5 md:flex">
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`rounded-lg px-3 py-1.5 font-semibold text-xs tracking-wide transition-all ${
+                  pathname === link.href
+                    ? "border border-primary/20 bg-primary/15 text-primary"
+                    : "border border-transparent text-muted-foreground hover:bg-muted/30 hover:text-foreground"
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
           </nav>
         </div>
 
-        {/* Right */}
+        {/* Right side */}
         <div className="flex items-center gap-3">
           {/* Live badge */}
-          <div className="hidden items-center gap-1.5 rounded-full border border-red-500/20 bg-red-500/10 px-3 py-1.5 min-[360px]:flex">
+          <Link
+            href="/live"
+            className="hidden items-center gap-1.5 rounded-full border border-red-500/20 bg-red-500/10 px-3 py-1.5 transition-colors hover:bg-red-500/15 min-[360px]:flex"
+          >
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500" />
             </span>
             <span className="font-semibold text-red-400 text-xs">LIVE</span>
-          </div>
+          </Link>
 
-          {/* Live clock */}
-          <LiveClock />
-
-          {/* Theme toggle */}
           <ThemeToggle />
 
           {/* Mobile menu button */}
@@ -164,30 +128,35 @@ export default function Navbar() {
       {/* Mobile nav dropdown */}
       {mobileMenuOpen && (
         <div className="border-white/8 border-t bg-background/95 backdrop-blur-lg md:hidden">
-          <nav className="flex flex-col gap-2 px-4 py-4">
-            <Link
-              href="/"
-              onClick={() => setMobileMenuOpen(false)}
-              className={`rounded-xl px-4 py-3 font-semibold text-sm transition-all ${
-                pathname === "/"
-                  ? "border border-primary/20 bg-primary/15 text-primary"
-                  : "text-muted-foreground hover:bg-muted/30 hover:text-foreground"
-              }`}
-            >
-              Live Channels
-            </Link>
-            <Link
-              href="/world-cup"
-              onClick={() => setMobileMenuOpen(false)}
-              className={`flex items-center gap-2 rounded-xl px-4 py-3 font-semibold text-sm transition-all ${
-                pathname === "/world-cup"
-                  ? "border border-amber-500/25 bg-amber-500/15 text-amber-400"
-                  : "text-muted-foreground hover:bg-muted/30 hover:text-foreground"
-              }`}
-            >
-              <Trophy className="h-4 w-4 text-amber-400" />
-              World Cup 2026
-            </Link>
+          <nav className="flex flex-col gap-1 px-4 py-4">
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`rounded-xl px-4 py-3 font-semibold text-sm transition-all ${
+                  pathname === link.href
+                    ? "border border-primary/20 bg-primary/15 text-primary"
+                    : "text-muted-foreground hover:bg-muted/30 hover:text-foreground"
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
+            <div className="mt-2 border-t border-white/[0.06] pt-2">
+              {[
+                { href: "/channels", label: "📺 Channel Directory" },
+                { href: "/blog", label: "📝 Blog" },
+                { href: "/disclaimer", label: "⚠️ Disclaimer" },
+              ].map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="flex rounded-xl px-4 py-2.5 text-muted-foreground text-sm transition-all hover:bg-muted/30 hover:text-foreground"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
           </nav>
         </div>
       )}

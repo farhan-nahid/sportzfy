@@ -7,7 +7,6 @@ import MatchCard from "@/components/shared/MatchCard";
 import SportBadge from "@/components/shared/SportBadge";
 import type { StreamedMatch, StreamedStream } from "@/lib/streamed";
 import {
-  fetchAllMatches,
   fetchMatchStreams,
   formatMatchDate,
   formatMatchTime,
@@ -16,6 +15,37 @@ import {
   isMatchLive,
 } from "@/lib/streamed";
 import StreamPlayer from "./MatchPlayer";
+
+/** Try football endpoint first, then all-sports as fallback */
+async function findMatch(
+  matchId: string,
+): Promise<{ match: StreamedMatch | null; all: StreamedMatch[] }> {
+  // 1. Football endpoint (streamed.pk data)
+  try {
+    const res = await fetch("/api/sports?endpoint=football");
+    if (res.ok) {
+      const data: StreamedMatch[] = await res.json();
+      const found = data.find((m) => m.id === matchId);
+      if (found) return { match: found, all: data };
+    }
+  } catch {
+    /* ignore */
+  }
+
+  // 2. All-sports fallback (ESPN data for other sports)
+  try {
+    const res = await fetch("/api/sports?endpoint=all");
+    if (res.ok) {
+      const data: StreamedMatch[] = await res.json();
+      const found = data.find((m) => m.id === matchId);
+      return { match: found ?? null, all: data };
+    }
+  } catch {
+    /* ignore */
+  }
+
+  return { match: null, all: [] };
+}
 
 interface Props {
   matchId: string;
@@ -34,9 +64,8 @@ export default function MatchDetailClient({ matchId }: Props) {
       setLoadingMatch(true);
       setError(null);
       try {
-        // Fetch all matches and find by ID
-        const all = await fetchAllMatches();
-        const found = all.find((m) => m.id === matchId);
+        // Try football endpoint first (streamed.pk), then all-sports fallback
+        const { match: found, all } = await findMatch(matchId);
         setMatch(found ?? null);
 
         if (found) {
@@ -46,11 +75,26 @@ export default function MatchDetailClient({ matchId }: Props) {
             .slice(0, 5);
           setRelated(rel);
 
-          // Fetch streams for match
+          // Fetch streams for each source the match has
           setLoadingStreams(true);
           try {
-            const matchStreams = await fetchMatchStreams("server1", matchId);
-            setStreams(Array.isArray(matchStreams) ? matchStreams : []);
+            const sources = found.sources ?? [];
+            if (sources.length === 0) {
+              setStreams([]);
+            } else {
+              const streamArrays = await Promise.all(
+                sources
+                  .slice(0, 5)
+                  .map((s) =>
+                    fetchMatchStreams(s.source, s.id).catch(() => [] as StreamedStream[]),
+                  ),
+              );
+              // Flatten — IDs are unique per source+streamNo
+              const flat: StreamedStream[] = streamArrays.flat();
+              // Sort by viewers descending (most-watched first)
+              flat.sort((a, b) => (b.viewers ?? 0) - (a.viewers ?? 0));
+              setStreams(flat);
+            }
           } catch {
             setStreams([]);
           } finally {

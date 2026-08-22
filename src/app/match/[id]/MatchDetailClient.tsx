@@ -7,7 +7,6 @@ import MatchCard from "@/components/shared/MatchCard";
 import SportBadge from "@/components/shared/SportBadge";
 import type { StreamedMatch, StreamedStream } from "@/lib/streamed";
 import {
-  fetchAllMatches,
   fetchMatchStreams,
   formatMatchDate,
   formatMatchTime,
@@ -16,6 +15,37 @@ import {
   isMatchLive,
 } from "@/lib/streamed";
 import StreamPlayer from "./MatchPlayer";
+
+/** Try football endpoint first, then all-sports as fallback */
+async function findMatch(
+  matchId: string,
+): Promise<{ match: StreamedMatch | null; all: StreamedMatch[] }> {
+  // 1. Football endpoint (streamed.pk data)
+  try {
+    const res = await fetch("/api/sports?endpoint=football");
+    if (res.ok) {
+      const data: StreamedMatch[] = await res.json();
+      const found = data.find((m) => m.id === matchId);
+      if (found) return { match: found, all: data };
+    }
+  } catch {
+    /* ignore */
+  }
+
+  // 2. All-sports fallback (ESPN data for other sports)
+  try {
+    const res = await fetch("/api/sports?endpoint=all");
+    if (res.ok) {
+      const data: StreamedMatch[] = await res.json();
+      const found = data.find((m) => m.id === matchId);
+      return { match: found ?? null, all: data };
+    }
+  } catch {
+    /* ignore */
+  }
+
+  return { match: null, all: [] };
+}
 
 interface Props {
   matchId: string;
@@ -34,9 +64,8 @@ export default function MatchDetailClient({ matchId }: Props) {
       setLoadingMatch(true);
       setError(null);
       try {
-        // Fetch all matches and find by ID
-        const all = await fetchAllMatches();
-        const found = all.find((m) => m.id === matchId);
+        // Try football endpoint first (streamed.pk), then all-sports fallback
+        const { match: found, all } = await findMatch(matchId);
         setMatch(found ?? null);
 
         if (found) {
@@ -46,19 +75,30 @@ export default function MatchDetailClient({ matchId }: Props) {
             .slice(0, 5);
           setRelated(rel);
 
-          // Fetch streams for each source
-          if (found.sources && found.sources.length > 0) {
-            setLoadingStreams(true);
-            const streamResults = await Promise.allSettled(
-              found.sources.map((src) => fetchMatchStreams(src.source, matchId)),
-            );
-            const allStreams: StreamedStream[] = [];
-            for (const result of streamResults) {
-              if (result.status === "fulfilled" && Array.isArray(result.value)) {
-                allStreams.push(...result.value);
-              }
+          // Fetch streams for each source the match has
+          setLoadingStreams(true);
+          try {
+            const sources = found.sources ?? [];
+            if (sources.length === 0) {
+              setStreams([]);
+            } else {
+              const streamArrays = await Promise.all(
+                sources
+                  .slice(0, 5)
+                  .map((s) =>
+                    fetchMatchStreams(s.source, s.id).catch(() => [] as StreamedStream[]),
+                  ),
+              );
+              // Flatten — IDs are unique per source+streamNo
+              const flat: StreamedStream[] = streamArrays.flat();
+              // Sort by viewers descending (most-watched first)
+              flat.sort((a, b) => (b.viewers ?? 0) - (a.viewers ?? 0));
+              setStreams(flat);
             }
-            setStreams(allStreams);
+          } catch {
+            setStreams([]);
+          } finally {
+            setLoadingStreams(false);
           }
         }
       } catch {
@@ -181,7 +221,7 @@ export default function MatchDetailClient({ matchId }: Props) {
       </section>
 
       <main className="mx-auto w-full max-w-screen-xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
-        <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
+        <div className="grid gap-8 lg:grid-cols-[1fr_340px] lg:items-start">
           {/* Player column */}
           <div>
             <StreamPlayer
@@ -272,7 +312,7 @@ export default function MatchDetailClient({ matchId }: Props) {
           </div>
 
           {/* Sidebar */}
-          <aside className="space-y-6">
+          <aside className="sticky top-20 space-y-6">
             {related.length > 0 && (
               <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5">
                 <h3 className="mb-3 font-bold text-foreground text-sm">

@@ -35,9 +35,10 @@ export interface StreamedStream {
   streamNo: number;
   language: string;
   hd: boolean;
-  embedUrl: string;
+  embedUrl: string | null;
   source: string;
   m3u8?: string;
+  viewers?: number;
 }
 
 // ─── Display helpers ──────────────────────────────────────────────────────────
@@ -147,7 +148,7 @@ export async function fetchLiveMatches(): Promise<StreamedMatch[]> {
   return res.json();
 }
 
-/** Fetch streams for a match */
+/** Fetch streams for a match from a specific source */
 export async function fetchMatchStreams(
   source: string,
   matchId: string,
@@ -155,6 +156,7 @@ export async function fetchMatchStreams(
   const res = await fetch(
     `/api/sports?source=${encodeURIComponent(source)}&matchId=${encodeURIComponent(matchId)}`,
   );
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
+  if (!res.ok) return [];
+  const data = await res.json();
+  return Array.isArray(data) ? data : [];
 }

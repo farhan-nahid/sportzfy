@@ -190,7 +190,7 @@ export default function ChannelDetailClient({ channelId }: Props) {
       </section>
 
       <main className="mx-auto w-full max-w-screen-xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
-        <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
+        <div className="grid gap-8 lg:grid-cols-[1fr_320px] lg:items-start">
           {/* Player */}
           <div>
             <ChannelPagePlayer channel={channel} />
@@ -264,7 +264,7 @@ export default function ChannelDetailClient({ channelId }: Props) {
           </div>
 
           {/* Sidebar */}
-          <aside className="space-y-6">
+          <aside className="sticky top-20 space-y-6">
             {related.length > 0 && (
               <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5">
                 <h3 className="mb-4 font-bold text-foreground text-sm">

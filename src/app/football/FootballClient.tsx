@@ -1,23 +1,187 @@
 "use client";
 
-import { Loader2, RefreshCw, WifiOff, X } from "lucide-react";
+import { Loader2, RefreshCw, WifiOff } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import MatchCard from "@/components/shared/MatchCard";
 import type { StreamedMatch } from "@/lib/streamed";
-import { fetchFootballMatches, isMatchLive } from "@/lib/streamed";
+import { formatMatchTime, isMatchLive } from "@/lib/streamed";
 import { cn } from "@/lib/utils";
 
+const STREAMED_BASE = "https://streamed.pk";
+
 const LEAGUES = [
+  { name: "All", flag: "🌍", searchKey: null },
   { name: "Premier League", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", searchKey: "premier" },
   { name: "La Liga", flag: "🇪🇸", searchKey: "la liga" },
   { name: "Serie A", flag: "🇮🇹", searchKey: "serie a" },
   { name: "Bundesliga", flag: "🇩🇪", searchKey: "bundesliga" },
   { name: "Ligue 1", flag: "🇫🇷", searchKey: "ligue 1" },
   { name: "Champions League", flag: "🏆", searchKey: "champions" },
-  { name: "Europa League", flag: "🇪🇺", searchKey: "europa" },
   { name: "MLS", flag: "🇺🇸", searchKey: "mls" },
 ];
+
+async function loadFootballData(): Promise<StreamedMatch[]> {
+  const res = await fetch("/api/sports?endpoint=football");
+  if (res.ok) {
+    const data = await res.json();
+    if (Array.isArray(data) && data.length > 0) return data;
+  }
+  return [];
+}
+
+function getMatchPoster(match: StreamedMatch): string | null {
+  if (match.poster) return match.poster;
+  return null;
+}
+
+function getPosterUrl(path: string): string {
+  if (path.startsWith("http")) return path;
+  return `${STREAMED_BASE}${path}`;
+}
+
+function TeamBadge({
+  badge,
+  name,
+  size = 28,
+}: {
+  badge?: string | null;
+  name: string;
+  size?: number;
+}) {
+  const [err, setErr] = useState(false);
+  if (!badge || err) {
+    return (
+      <div
+        className="flex items-center justify-center rounded-full bg-white/10 font-black text-white/80"
+        style={{ width: size, height: size, fontSize: size * 0.4 }}
+      >
+        {name.charAt(0).toUpperCase()}
+      </div>
+    );
+  }
+  return (
+    <Image
+      src={badge}
+      alt={name}
+      width={size}
+      height={size}
+      className="object-contain"
+      onError={() => setErr(true)}
+      unoptimized
+    />
+  );
+}
+
+function MatchCard({ match }: { match: StreamedMatch }) {
+  const live = isMatchLive(match);
+  const poster = getMatchPoster(match);
+  const href = `/match/${match.id}`;
+  const time = formatMatchTime(match.date);
+
+  const homeTeam = match.teams?.home;
+  const awayTeam = match.teams?.away;
+
+  return (
+    <Link href={href} className="group block">
+      <div className="overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.04] transition-all duration-200 hover:border-green-500/30 hover:bg-white/[0.07] hover:-translate-y-0.5">
+        {/* Poster */}
+        <div className="relative aspect-video w-full overflow-hidden bg-black/60">
+          {poster ? (
+            <img
+              src={getPosterUrl(poster)}
+              alt={match.title}
+              className="size-full object-cover transition duration-300 group-hover:scale-105"
+              loading="lazy"
+            />
+          ) : (
+            <div
+              className="absolute inset-0 flex items-center justify-center"
+              style={{
+                background: `radial-gradient(circle at 25% 25%, rgba(34,197,94,0.35), transparent 50%),
+                  radial-gradient(circle at 75% 75%, rgba(16,185,129,0.25), transparent 50%),
+                  linear-gradient(135deg, #050d08, #0a1a10)`,
+              }}
+            >
+              {homeTeam && awayTeam ? (
+                <div className="flex items-center gap-3">
+                  <TeamBadge badge={homeTeam.badge} name={homeTeam.name} size={36} />
+                  <span className="font-black text-white/50 text-sm">VS</span>
+                  <TeamBadge badge={awayTeam.badge} name={awayTeam.name} size={36} />
+                </div>
+              ) : (
+                <span className="text-3xl">⚽</span>
+              )}
+            </div>
+          )}
+
+          {/* Live / time badge */}
+          <span
+            className={cn(
+              "absolute right-2 top-2 rounded-full px-2.5 py-1 text-[11px] font-black uppercase text-white",
+              live ? "bg-red-500" : "bg-black/65",
+            )}
+          >
+            {live ? "Live" : time}
+          </span>
+
+          {/* Popular star */}
+          {match.popular && (
+            <span className="absolute left-2 top-2 rounded-full bg-amber-500/90 px-1.5 py-0.5 text-[10px] font-black text-black">
+              ⭐
+            </span>
+          )}
+        </div>
+
+        {/* Info */}
+        <div className="p-3">
+          <h3 className="line-clamp-2 font-black text-sm text-white transition group-hover:text-green-300">
+            {match.title}
+          </h3>
+          <div className="mt-1 flex items-center justify-between gap-2">
+            <span className="text-muted-foreground text-[11px] font-semibold">
+              Football
+            </span>
+            <span
+              className={cn(
+                "text-[11px] font-bold",
+                live ? "text-red-400" : "text-slate-500",
+              )}
+            >
+              {live ? "🔴 Live" : time}
+            </span>
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+function DateGroup({
+  label,
+  matches,
+  eventCount,
+}: {
+  label: string;
+  matches: StreamedMatch[];
+  eventCount: number;
+}) {
+  return (
+    <section className="grid gap-5 md:grid-cols-[110px_minmax(0,1fr)]">
+      <div className="text-center md:text-right">
+        <p className="font-black text-lg text-white">{label}</p>
+        <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">
+          {eventCount} event{eventCount !== 1 ? "s" : ""}
+        </p>
+      </div>
+      <div className="grid gap-x-4 gap-y-6 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        {matches.map((m) => (
+          <MatchCard key={m.id} match={m} />
+        ))}
+      </div>
+    </section>
+  );
+}
 
 export default function FootballClient() {
   const [matches, setMatches] = useState<StreamedMatch[]>([]);
@@ -29,8 +193,11 @@ export default function FootballClient() {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchFootballMatches();
-      setMatches(Array.isArray(data) ? data : []);
+      const data = await loadFootballData();
+      setMatches(data);
+      if (data.length === 0) {
+        setError("No football fixtures found right now. Try refreshing.");
+      }
     } catch {
       setError("Could not load football fixtures. Check your connection.");
     } finally {
@@ -50,48 +217,82 @@ export default function FootballClient() {
     return matches.filter((m) => {
       const league = (m.league || "").toLowerCase();
       const title = (m.title || "").toLowerCase();
-      return league.includes(key) || title.includes(key);
+      const home = (m.teams?.home?.name || "").toLowerCase();
+      const away = (m.teams?.away?.name || "").toLowerCase();
+      return (
+        league.includes(key) ||
+        title.includes(key) ||
+        home.includes(key) ||
+        away.includes(key)
+      );
     });
   }, [matches, selectedLeague]);
 
-  const liveMatches = useMemo(
-    () => filteredMatches.filter(isMatchLive),
+  const liveCount = useMemo(
+    () => filteredMatches.filter((m) => isMatchLive(m)).length,
     [filteredMatches],
   );
-  const upcomingMatches = useMemo(
-    () =>
-      filteredMatches
-        .filter((m) => !isMatchLive(m) && m.date > Date.now())
-        .sort((a, b) => a.date - b.date),
-    [filteredMatches],
-  );
-  const todayUpcoming = useMemo(() => {
-    const end = new Date();
-    end.setHours(23, 59, 59, 999);
-    return upcomingMatches.filter((m) => new Date(m.date) <= end);
-  }, [upcomingMatches]);
+
+  // Group by day, with live matches shown first within each day
+  const groupedByDay = useMemo(() => {
+    const sorted = [...filteredMatches].sort((a, b) => {
+      if (isMatchLive(a) && !isMatchLive(b)) return -1;
+      if (!isMatchLive(a) && isMatchLive(b)) return 1;
+      return a.date - b.date;
+    });
+
+    const groups = new Map<string, StreamedMatch[]>();
+    for (const m of sorted) {
+      const d = new Date(m.date);
+      const key = d.toDateString();
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)!.push(m);
+    }
+
+    return Array.from(groups.entries()).map(([dateStr, ms]) => {
+      const d = new Date(dateStr);
+      const today = new Date();
+      const tomorrow = new Date(today);
+      tomorrow.setDate(today.getDate() + 1);
+
+      let label: string;
+      if (d.toDateString() === today.toDateString()) {
+        label = `Today, ${d.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`;
+      } else if (d.toDateString() === tomorrow.toDateString()) {
+        label = `Tomorrow, ${d.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`;
+      } else {
+        label = d.toLocaleDateString("en-US", {
+          weekday: "short",
+          month: "short",
+          day: "numeric",
+        });
+      }
+
+      return { date: dateStr, label, matches: ms };
+    });
+  }, [filteredMatches]);
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center gap-4 py-20">
-        <Loader2 className="h-10 w-10 animate-spin text-primary" />
-        <p className="text-muted-foreground text-sm">Loading football fixtures…</p>
+      <div className="flex flex-col items-center gap-4 py-24">
+        <Loader2 className="h-12 w-12 animate-spin text-green-400" />
+        <p className="text-slate-400 text-sm">Loading football fixtures…</p>
       </div>
     );
   }
 
-  if (error) {
+  if (error && matches.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-4 rounded-2xl border border-red-500/20 bg-red-500/5 py-16 text-center">
+      <div className="flex flex-col items-center gap-4 rounded-2xl border border-red-500/20 bg-red-500/5 py-20 text-center">
         <WifiOff className="h-12 w-12 text-red-400/60" />
         <div>
-          <h3 className="font-semibold text-foreground">Connection Error</h3>
-          <p className="mt-1 text-muted-foreground text-sm">{error}</p>
+          <h3 className="font-semibold text-white">Could Not Load Fixtures</h3>
+          <p className="mt-1 text-slate-400 text-sm">{error}</p>
         </div>
         <button
           type="button"
           onClick={load}
-          className="rounded-xl bg-primary px-5 py-2.5 font-semibold text-primary-foreground text-sm hover:opacity-90"
+          className="rounded-xl bg-green-500 px-5 py-2.5 font-bold text-black text-sm hover:bg-green-400 transition-colors"
         >
           Try Again
         </button>
@@ -101,180 +302,105 @@ export default function FootballClient() {
 
   return (
     <div>
-      {/* League quick-links / Top Competitions */}
-      <section className="mb-8">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-bold text-foreground text-lg">Top Competitions</h2>
+      {/* Header */}
+      <div className="mb-8 flex flex-col gap-3 border-b border-white/10 pb-6 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-green-400">
+            Live and upcoming
+          </p>
+          <h1 className="mt-2 font-black text-3xl text-white sm:text-5xl">
+            Football Streams
+          </h1>
+          <p className="mt-3 max-w-2xl text-sm font-semibold text-slate-400">
+            Browse football matches from the Streamed schedule, with live events shown
+            first.
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          {liveCount > 0 && (
+            <span className="w-fit rounded-full bg-red-500/15 px-3 py-1 text-xs font-black uppercase text-red-100">
+              {liveCount} live
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={load}
+            className="flex items-center gap-1.5 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-slate-400 text-sm transition-colors hover:bg-white/[0.08] hover:text-white"
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      {/* League filter pills */}
+      <div className="mb-8 flex flex-wrap gap-2">
+        {LEAGUES.map((league) => {
+          const isSelected = selectedLeague === league.searchKey;
+          return (
+            <button
+              key={league.name}
+              type="button"
+              onClick={() =>
+                setSelectedLeague(
+                  isSelected && league.searchKey !== null ? null : league.searchKey,
+                )
+              }
+              className={cn(
+                "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-bold transition-all",
+                isSelected
+                  ? "border-green-500 bg-green-500/20 text-green-300"
+                  : "border-white/[0.08] bg-white/[0.04] text-slate-300 hover:border-green-500/30 hover:bg-white/[0.08] hover:text-white",
+              )}
+            >
+              <span>{league.flag}</span>
+              {league.name}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Fixture count */}
+      <div className="mb-6 flex items-center justify-between">
+        <p className="text-slate-400 text-sm">
+          {filteredMatches.length} fixture{filteredMatches.length !== 1 ? "s" : ""}
+          {selectedLeague && (
+            <span className="ml-1.5 rounded-full border border-green-500/20 bg-green-500/10 px-2 py-0.5 font-medium text-green-400 text-xs capitalize">
+              {selectedLeague}
+            </span>
+          )}
+        </p>
+      </div>
+
+      {/* Grouped matches */}
+      {groupedByDay.length > 0 ? (
+        <div className="space-y-12">
+          {groupedByDay.map((group) => (
+            <DateGroup
+              key={group.date}
+              label={group.label}
+              matches={group.matches}
+              eventCount={group.matches.length}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] py-20 text-center">
+          <p className="font-semibold text-white">No fixtures found</p>
+          <p className="mt-1 text-slate-400 text-sm">
+            Try selecting a different league or clear the filter.
+          </p>
           {selectedLeague && (
             <button
               type="button"
               onClick={() => setSelectedLeague(null)}
-              className="flex items-center gap-1 font-medium text-primary text-xs hover:underline"
+              className="mt-4 rounded-xl bg-green-500 px-4 py-2 font-bold text-black text-xs transition-opacity hover:opacity-90"
             >
-              <X className="h-3.5 w-3.5" />
-              Show all competitions
+              Show all football fixtures
             </button>
           )}
         </div>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
-          {LEAGUES.map((league) => {
-            const isSelected = selectedLeague === league.searchKey;
-            return (
-              <button
-                key={league.name}
-                type="button"
-                onClick={() => setSelectedLeague(isSelected ? null : league.searchKey)}
-                className={cn(
-                  "flex flex-col items-center gap-2 rounded-2xl border p-3 text-center transition-all",
-                  isSelected
-                    ? "border-primary bg-primary/15 text-primary shadow-lg shadow-primary/10"
-                    : "border-white/[0.08] bg-white/[0.04] text-muted-foreground hover:-translate-y-0.5 hover:border-primary/30 hover:bg-white/[0.08]",
-                )}
-              >
-                <span className="text-2xl">{league.flag}</span>
-                <span
-                  className={cn(
-                    "font-medium text-[11px] leading-tight",
-                    isSelected ? "font-bold text-primary" : "text-muted-foreground",
-                  )}
-                >
-                  {league.name}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </section>
-
-      <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
-        {/* Main column */}
-        <div className="space-y-8">
-          {/* Refresh & status info */}
-          <div className="flex items-center justify-between">
-            <p className="text-muted-foreground text-sm">
-              {filteredMatches.length} fixture{filteredMatches.length !== 1 ? "s" : ""}
-              {selectedLeague && (
-                <span className="ml-1.5 rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 font-medium text-primary text-xs capitalize">
-                  Filter: {selectedLeague}
-                </span>
-              )}
-            </p>
-            <button
-              type="button"
-              onClick={load}
-              className="flex items-center gap-1.5 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-muted-foreground text-sm transition-colors hover:bg-white/[0.08] hover:text-foreground"
-            >
-              <RefreshCw className="h-3.5 w-3.5" />
-              Refresh
-            </button>
-          </div>
-
-          {/* Live now */}
-          {liveMatches.length > 0 && (
-            <section>
-              <div className="mb-3 flex items-center gap-3">
-                <h2 className="font-bold text-foreground text-lg">Live Now</h2>
-                <span className="flex items-center gap-1 rounded-full border border-red-500/30 bg-red-500/10 px-2 py-0.5 font-medium text-red-400 text-xs">
-                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-400" />
-                  {liveMatches.length} live
-                </span>
-              </div>
-              <div className="space-y-2">
-                {liveMatches.map((m) => (
-                  <MatchCard key={m.id} match={m} />
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Upcoming */}
-          {upcomingMatches.length > 0 && (
-            <section>
-              <h2 className="mb-3 font-bold text-foreground text-lg">
-                Upcoming Fixtures
-              </h2>
-              <div className="space-y-2">
-                {upcomingMatches.map((m) => (
-                  <MatchCard key={m.id} match={m} showDate />
-                ))}
-              </div>
-            </section>
-          )}
-
-          {filteredMatches.length === 0 && (
-            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] py-16 text-center">
-              <p className="font-semibold text-foreground">
-                No fixtures found for this competition
-              </p>
-              <p className="mt-1 text-muted-foreground text-sm">
-                Try selecting a different league or clear the filter.
-              </p>
-              <button
-                type="button"
-                onClick={() => setSelectedLeague(null)}
-                className="mt-4 rounded-xl bg-primary px-4 py-2 font-semibold text-primary-foreground text-xs transition-opacity hover:opacity-90"
-              >
-                Show all football fixtures
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Sidebar */}
-        <aside className="space-y-6">
-          <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5">
-            <h3 className="mb-3 font-bold text-foreground text-sm">Quick Stats</h3>
-            <dl className="space-y-3">
-              {[
-                { label: "Live Matches", value: liveMatches.length },
-                { label: "Today's Fixtures", value: todayUpcoming.length },
-                { label: "Total Fixtures", value: filteredMatches.length },
-                {
-                  label: "Popular Matches",
-                  value: filteredMatches.filter((m) => m.popular).length,
-                },
-              ].map(({ label, value }) => (
-                <div key={label} className="flex items-center justify-between">
-                  <dt className="text-muted-foreground text-xs">{label}</dt>
-                  <dd className="font-bold text-foreground text-sm">{value}</dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-
-          <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-5">
-            <h3 className="mb-2 flex items-center gap-2 font-bold text-foreground text-sm">
-              <span>🏆</span> League Point Tables
-            </h3>
-            <p className="mb-4 text-muted-foreground text-xs leading-relaxed">
-              Check live standings, points, goals, wins, and losses for Premier League, La
-              Liga, Serie A, and more.
-            </p>
-            <Link
-              href="/standings"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/20 px-4 py-2.5 font-bold text-amber-400 text-sm transition-all hover:bg-amber-500/30"
-            >
-              🏆 View Point Tables
-            </Link>
-          </div>
-
-          <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5">
-            <h3 className="mb-2 font-bold text-foreground text-sm">
-              Watch Live Football
-            </h3>
-            <p className="mb-4 text-muted-foreground text-xs leading-relaxed">
-              Stream football channels from beIN Sports, Fox Sports, Sky Sports, and 100+
-              more for free.
-            </p>
-            <Link
-              href="/"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 font-bold text-primary-foreground text-sm transition-all hover:opacity-90"
-            >
-              📺 Browse Channels
-            </Link>
-          </div>
-        </aside>
-      </div>
+      )}
     </div>
   );
 }

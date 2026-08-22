@@ -15,6 +15,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "i.postimg.cc" },
       { protocol: "https", hostname: "streamed.su" },
       { protocol: "https", hostname: "cdn.streamed.su" },
+      { protocol: "https", hostname: "streamed.pk" },
     ],
   },
 };
